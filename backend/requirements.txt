@@ -1,0 +1,64 @@
+# Core Framework
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+
+# Database
+sqlalchemy
+alembic
+psycopg2-binary
+
+# ML & Data Science
+scikit-learn
+xgboost
+lightgbm
+numpy
+pandas
+scipy
+
+# Explainability
+shap
+matplotlib
+plotly
+
+# Utilities
+python-multipart
+python-dotenv
+python-dateutil
+requests
+aiofiles
+joblib
+
+# Monitoring & Logging
+sentry-sdk
+python-json-logger
+
+# Testing
+pytest
+pytest-cov
+pytest-asyncio
+httpx
+
+# Code Quality
+black
+flake8
+mypy
+pylint
+
+# Security
+cryptography
+passlib
+python-jose
+bcrypt
+
+# Cloud Storage (Optional)
+#boto3
+#s3fs
+
+# Rate Limiting
+slowapi
+
+# Async
+asyncio
+aiohttp

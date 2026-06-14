@@ -1,0 +1,10 @@
+credit_risk/
+.vscode/
+.env.example
+.env
+__pycache__/
+.ipynb_checkpoints/
+*.pyc
+*.pyo
+.DS_Store
+.idea/
