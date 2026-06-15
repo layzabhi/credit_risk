@@ -192,7 +192,7 @@ class ModelRegistry(Base):
     preprocessor_path = Column(String(500), nullable=True)
     
     # Additional metadata
-    metadata = Column(JSON, nullable=True)
+    model_metadata = Column("metadata", JSON, nullable=True)
     notes = Column(Text, nullable=True)
     
     # Timestamps

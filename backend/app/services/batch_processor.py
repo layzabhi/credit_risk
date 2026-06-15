@@ -9,6 +9,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 from enum import Enum
 import uuid
+import os
 
 import pandas as pd
 from sqlalchemy.orm import Session
@@ -17,6 +18,7 @@ from app.models.schemas import ScoringRequest, BatchJobResponse, BatchResultResp
 from app.models.database import BatchJob, BatchResult
 from app.services.scorer import ScoringService
 from app.core.exceptions import ValidationException, ApplicationException
+from app.database.session import get_db_context
 
 logger = logging.getLogger(__name__)
 
@@ -109,9 +111,10 @@ class BatchProcessor:
             db_job = BatchJob(
                 job_id=job_id,
                 job_name=job_name or f"Batch_{job_id[:8]}",
-                status=JobStatus.PENDING,
+                status=JobStatus.PENDING.value,
                 total_records=len(df),
                 processed_records=0,
+                failed_records=0,
                 csv_file_path=csv_file_path,
                 created_at=datetime.utcnow(),
             )
@@ -123,7 +126,7 @@ class BatchProcessor:
             job_response = BatchJobResponse(
                 job_id=job_id,
                 job_name=db_job.job_name,
-                status=JobStatus.PENDING,
+                status=JobStatus.PENDING.value,
                 total_records=len(df),
                 processed_records=0,
                 created_at=db_job.created_at,
@@ -131,8 +134,9 @@ class BatchProcessor:
             
             self._jobs[job_id] = job_response
             
-            # Queue async processing
-            asyncio.create_task(self._process_batch(job_id, df))
+            # Queue async processing task and store reference
+            task = asyncio.create_task(self._process_batch(job_id, df))
+            self._job_tasks[job_id] = task
             
             return job_response
         
@@ -150,92 +154,144 @@ class BatchProcessor:
             )
     
     async def _process_batch(self, job_id: str, df: pd.DataFrame):
-        """
-        Process batch asynchronously.
-        
-        Args:
-            job_id: Batch job ID
-            df: DataFrame with applicant records
-        """
+        """Process batch asynchronously in a separate database session context."""
         try:
-            # Update status
-            self._jobs[job_id].status = JobStatus.PROCESSING
-            db_job = self.db.query(BatchJob).filter(BatchJob.job_id == job_id).first()
-            db_job.status = JobStatus.PROCESSING
-            db_job.started_at = datetime.utcnow()
-            self.db.commit()
-            
-            logger.info(f"Processing batch {job_id}: {len(df)} records")
-            
-            # Score each applicant
-            results = []
-            for idx, row in df.iterrows():
-                try:
-                    # Convert row to ScoringRequest
-                    request = ScoringRequest(**row.to_dict())
-                    
-                    # Score
-                    response = self.scoring_service.score_applicant(request)
-                    
-                    # Store result
-                    db_result = BatchResult(
-                        job_id=job_id,
-                        applicant_id=response.applicant_id,
-                        risk_rating=response.risk_rating,
-                        default_probability=response.default_probability,
-                        confidence_score=response.confidence_score,
-                        result_data=response.dict(),
-                    )
-                    self.db.add(db_result)
-                    results.append(response)
-                    
-                    # Update progress
-                    db_job.processed_records += 1
-                    self.db.commit()
-                    
-                except Exception as e:
-                    logger.warning(f"Failed to score record {idx}: {e}")
-                    db_job.failed_records = (db_job.failed_records or 0) + 1
-                    self.db.commit()
-                    continue
+            # Create a separate connection session context for background safety
+            with get_db_context() as db:
+                db_job = db.query(BatchJob).filter(BatchJob.job_id == job_id).first()
+                if not db_job:
+                    logger.error(f"Job {job_id} not found in DB inside background task")
+                    return
                 
-                # Yield event loop (prevent blocking)
-                if (idx + 1) % 10 == 0:
-                    await asyncio.sleep(0.1)
-            
-            # Compute aggregate metrics
-            ratings_dist = pd.Series([r.risk_rating for r in results]).value_counts().to_dict()
-            probabilities = [r.default_probability for r in results]
-            
-            # Update job record
-            db_job.status = JobStatus.COMPLETED
-            db_job.completed_at = datetime.utcnow()
-            db_job.summary_metrics = {
-                "ratings_distribution": {k.value: v for k, v in ratings_dist.items()},
-                "mean_probability": float(pd.Series(probabilities).mean()),
-                "std_probability": float(pd.Series(probabilities).std()),
-                "min_probability": float(min(probabilities)),
-                "max_probability": float(max(probabilities)),
-            }
-            self.db.commit()
-            
-            # Update in-memory job
-            self._jobs[job_id].status = JobStatus.COMPLETED
-            self._jobs[job_id].processed_records = len(results)
-            self._jobs[job_id].summary_metrics = db_job.summary_metrics
-            
-            logger.info(f"Batch {job_id} completed: {len(results)} scored")
-        
+                # Update status to processing
+                db_job.status = JobStatus.PROCESSING.value
+                db_job.started_at = datetime.utcnow()
+                db.commit()
+                
+                if job_id in self._jobs:
+                    self._jobs[job_id].status = JobStatus.PROCESSING.value
+                    self._jobs[job_id].started_at = db_job.started_at
+                
+                logger.info(f"Processing batch {job_id}: {len(df)} records")
+                
+                results = []
+                for idx, row in df.iterrows():
+                    # Handle task cancellation
+                    try:
+                        current_task = asyncio.current_task()
+                        if current_task and current_task.cancelled():
+                            logger.info(f"Background task for batch job {job_id} was cancelled")
+                            return
+                    except Exception as ce:
+                        logger.warning(f"Error checking cancellation status: {ce}")
+                    
+                    try:
+                        # Convert row to ScoringRequest
+                        row_dict = row.to_dict()
+                        # Ensure applicant_id is set
+                        if "applicant_id" not in row_dict or pd.isna(row_dict["applicant_id"]):
+                            row_dict["applicant_id"] = str(uuid.uuid4())
+                            
+                        request = ScoringRequest(**row_dict)
+                        
+                        # Score applicant
+                        response = self.scoring_service.score_applicant(request)
+                        
+                        # Store result record
+                        db_result = BatchResult(
+                            batch_result_id=str(uuid.uuid4()),
+                            job_id=job_id,
+                            applicant_id=response.applicant_id,
+                            risk_rating=response.risk_rating.value,
+                            default_probability=response.default_probability,
+                            confidence_score=response.confidence_score,
+                            result_data=response.dict(),
+                            created_at=datetime.utcnow(),
+                        )
+                        db.add(db_result)
+                        results.append(response)
+                        
+                        # Update progress
+                        db_job.processed_records += 1
+                        db.commit()
+                        
+                        if job_id in self._jobs:
+                            self._jobs[job_id].processed_records = db_job.processed_records
+                            
+                    except Exception as e:
+                        logger.warning(f"Failed to score record {idx} for job {job_id}: {e}")
+                        db_job.failed_records = (db_job.failed_records or 0) + 1
+                        db.commit()
+                        continue
+                    
+                    # Yield event loop every 10 records
+                    if (idx + 1) % 10 == 0:
+                        await asyncio.sleep(0.01)
+                
+                # Compute aggregate metrics if we scored any successfully
+                if results:
+                    ratings_dist = pd.Series([r.risk_rating.value for r in results]).value_counts().to_dict()
+                    probabilities = [r.default_probability for r in results]
+                    
+                    db_job.status = JobStatus.COMPLETED.value
+                    db_job.completed_at = datetime.utcnow()
+                    db_job.summary_metrics = {
+                        "ratings_distribution": ratings_dist,
+                        "mean_probability": float(pd.Series(probabilities).mean()),
+                        "std_probability": float(pd.Series(probabilities).std()) if len(probabilities) > 1 else 0.0,
+                        "min_probability": float(min(probabilities)),
+                        "max_probability": float(max(probabilities)),
+                    }
+                    db.commit()
+                    
+                    if job_id in self._jobs:
+                        self._jobs[job_id].status = JobStatus.COMPLETED.value
+                        self._jobs[job_id].completed_at = db_job.completed_at
+                        self._jobs[job_id].summary_metrics = db_job.summary_metrics
+                else:
+                    db_job.status = JobStatus.FAILED.value
+                    db_job.completed_at = datetime.utcnow()
+                    db_job.error_message = "All records in batch failed to score"
+                    db.commit()
+                    
+                    if job_id in self._jobs:
+                        self._jobs[job_id].status = JobStatus.FAILED.value
+                        
+                logger.info(f"Batch {job_id} processing complete")
+                
+        except asyncio.CancelledError:
+            logger.warning(f"Batch task {job_id} cancelled.")
+            # Set status in database to cancelled
+            try:
+                with get_db_context() as db:
+                    db_job = db.query(BatchJob).filter(BatchJob.job_id == job_id).first()
+                    if db_job:
+                        db_job.status = JobStatus.CANCELLED.value
+                        db.commit()
+            except Exception as ex:
+                logger.error(f"Failed to update cancelled status in DB: {ex}")
+                
+            if job_id in self._jobs:
+                self._jobs[job_id].status = JobStatus.CANCELLED.value
+                
         except Exception as e:
             logger.error(f"Batch processing failed for {job_id}: {e}", exc_info=True)
-            
-            # Mark as failed
-            db_job = self.db.query(BatchJob).filter(BatchJob.job_id == job_id).first()
-            db_job.status = JobStatus.FAILED
-            db_job.error_message = str(e)
-            self.db.commit()
-            
-            self._jobs[job_id].status = JobStatus.FAILED
+            try:
+                with get_db_context() as db:
+                    db_job = db.query(BatchJob).filter(BatchJob.job_id == job_id).first()
+                    if db_job:
+                        db_job.status = JobStatus.FAILED.value
+                        db_job.error_message = str(e)
+                        db.commit()
+            except Exception as ex:
+                logger.error(f"Failed to update failed status in DB: {ex}")
+                
+            if job_id in self._jobs:
+                self._jobs[job_id].status = JobStatus.FAILED.value
+                
+        finally:
+            # Clean up task reference
+            self._job_tasks.pop(job_id, None)
     
     def get_batch_status(self, job_id: str) -> BatchJobResponse:
         """Get batch job status and progress."""
@@ -270,20 +326,9 @@ class BatchProcessor:
         limit: int = 1000,
         offset: int = 0,
     ) -> List[BatchResultResponse]:
-        """
-        Retrieve batch results with pagination.
-        
-        Args:
-            job_id: Batch job ID
-            limit: Number of results to return
-            offset: Result offset for pagination
-            
-        Returns:
-            List of BatchResultResponse objects
-        """
+        """Retrieve batch results with pagination."""
         # Verify job exists
-        if job_id not in self._jobs:
-            self.get_batch_status(job_id)  # Load from DB
+        self.get_batch_status(job_id)  # Load from DB or cache
         
         # Query results from DB
         db_results = (
@@ -312,7 +357,7 @@ class BatchProcessor:
         """Cancel pending or processing batch job."""
         job_response = self.get_batch_status(job_id)
         
-        if job_response.status not in [JobStatus.PENDING, JobStatus.PROCESSING]:
+        if job_response.status not in [JobStatus.PENDING.value, JobStatus.PROCESSING.value]:
             raise ApplicationException(
                 message="Cannot cancel completed or failed jobs",
                 details={"status": job_response.status},
@@ -325,10 +370,11 @@ class BatchProcessor:
         
         # Update status
         db_job = self.db.query(BatchJob).filter(BatchJob.job_id == job_id).first()
-        db_job.status = JobStatus.CANCELLED
-        self.db.commit()
+        if db_job:
+            db_job.status = JobStatus.CANCELLED.value
+            self.db.commit()
         
-        job_response.status = JobStatus.CANCELLED
+        job_response.status = JobStatus.CANCELLED.value
         
         logger.info(f"Batch job {job_id} cancelled")
         return job_response
@@ -338,16 +384,7 @@ class BatchProcessor:
         job_id: str,
         format: str = "csv",
     ) -> str:
-        """
-        Export batch results to file.
-        
-        Args:
-            job_id: Batch job ID
-            format: Export format ("csv" or "json")
-            
-        Returns:
-            Path to exported file
-        """
+        """Export batch results to file."""
         # Query all results
         db_results = (
             self.db.query(BatchResult)
@@ -355,24 +392,39 @@ class BatchProcessor:
             .all()
         )
         
-        if format == "csv":
-            # Create CSV
-            data = [
-                {
-                    "applicant_id": r.applicant_id,
-                    "risk_rating": r.risk_rating,
-                    "default_probability": r.default_probability,
-                    "confidence_score": r.confidence_score,
-                }
-                for r in db_results
-            ]
-            df = pd.DataFrame(data)
+        data = [
+            {
+                "applicant_id": r.applicant_id,
+                "risk_rating": r.risk_rating,
+                "default_probability": r.default_probability,
+                "confidence_score": r.confidence_score,
+            }
+            for r in db_results
+        ]
+        
+        if not data:
+            raise ApplicationException(
+                message="No results found to export",
+                details={"job_id": job_id},
+            )
             
-            filepath = f"/tmp/batch_results_{job_id}.csv"
+        df = pd.DataFrame(data)
+        
+        # Create temporary directory inside workspace to conform to workspace rules
+        # Never write outside workspace unless allowed. The workspace path is c:\All Projects\credit_risk_project
+        export_dir = Path("c:/All Projects/credit_risk_project/exports")
+        export_dir.mkdir(parents=True, exist_ok=True)
+        
+        if format == "csv":
+            filepath = export_dir / f"batch_results_{job_id}.csv"
             df.to_csv(filepath, index=False)
             logger.info(f"Exported {len(df)} results to {filepath}")
-            return filepath
-        
+            return str(filepath)
+        elif format == "json":
+            filepath = export_dir / f"batch_results_{job_id}.json"
+            df.to_json(filepath, orient="records", indent=2)
+            logger.info(f"Exported {len(df)} results to {filepath}")
+            return str(filepath)
         else:
             raise ValidationException(
                 message="Unsupported export format",
