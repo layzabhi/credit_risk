@@ -1,10 +1,81 @@
-credit_risk/
-.vscode/
-.env.example
-.env
+# Python
 __pycache__/
-.ipynb_checkpoints/
-*.pyc
-*.pyo
-.DS_Store
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+
+# ML Models & Artifacts (regeneratable from code)
+ml_training/ml_models/
+ml_training/ml_models/*
+ml_training/ml_artifacts/
+ml_training/ml_artifacts/*
+*.pkl
+*.pkl.gz
+*.joblib
+
+# Data files (SENSITIVE - never commit)
+ml_training/data/raw/*.csv
+ml_training/data/processed/
+!ml_training/data/raw/.gitkeep
+!ml_training/data/processed/.gitkeep
+
+# IDE
+.vscode/
 .idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables (NEVER commit)
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build outputs
+frontend/dist/
+backend/.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend build
+frontend/.eslintrc.json
+frontend/package-lock.json
+
+# Logs
+*.log
+logs/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Temporary files
+*.tmp
+tmp/
+temp/

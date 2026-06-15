@@ -4,11 +4,20 @@ Provides SHAP-based feature importance and decision explanations.
 """
 
 import logging
+from typing import Dict, Any
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.schemas import ExplanationData, ErrorResponse
+from app.models.schemas import ExplanationData, FeatureImportance, ErrorResponse
+from app.models.database import (
+    Explanation as DbExplanation,
+    ScoringRequest as DbScoringRequest,
+    Applicant,
+)
+from app.api.v1.endpoints.scoring import get_scoring_service
+from app.services.scorer import ScoringService
 from app.database.session import get_db
 
 logger = logging.getLogger(__name__)
@@ -28,53 +37,99 @@ router = APIRouter(prefix="/explain", tags=["explainability"])
 async def get_explanation(
     request_id: str,
     db: Session = Depends(get_db),
+    scoring_service: ScoringService = Depends(get_scoring_service),
 ) -> ExplanationData:
-    """
-    Get SHAP explanation for a specific scoring request.
-    
-    **Returns:**
-    - top_features: Top 5 features influencing the decision
-    - feature_importance_sum: Sum of feature importance values
-    - base_value: SHAP base value (expected model output)
-    - shap_values: Full SHAP values for all features
-    
-    **Feature Impact:**
-    - "positive": Feature increased default risk (red)
-    - "negative": Feature decreased default risk (green)
-    
-    **Example Response:**
-    ```json
-    {
-        "top_features": [
-            {
-                "name": "credit_score",
-                "impact": 0.45,
-                "direction": "negative"
-            },
-            {
-                "name": "debt_to_income_ratio",
-                "impact": 0.38,
-                "direction": "positive"
-            },
-            ...
-        ],
-        "feature_importance_sum": 0.95,
-        "base_value": 0.25,
-        "shap_values": {...}
-    }
-    ```
-    """
+    """Get SHAP explanation for a specific scoring request."""
     try:
-        # TODO: Query Explanation table by request_id
-        # If not cached, compute SHAP values
-        # Cache results for future requests
-        # Return ExplanationData
-        pass
+        # Check cache
+        cached = db.query(DbExplanation).filter(DbExplanation.request_id == request_id).first()
+        if cached:
+            top_feats = [
+                FeatureImportance(
+                    name=f["name"],
+                    impact=f["impact"],
+                    direction=f["direction"]
+                )
+                for f in cached.feature_importance
+            ]
+            return ExplanationData(
+                top_features=top_feats,
+                feature_importance_sum=sum(f.impact for f in top_feats),
+                base_value=cached.base_value,
+                shap_values=cached.shap_values,
+            )
+            
+        # If not cached, re-compute
+        scoring_request = db.query(DbScoringRequest).filter(DbScoringRequest.request_id == request_id).first()
+        if not scoring_request:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Scoring request {request_id} not found"
+            )
+            
+        applicant = db.query(Applicant).filter(Applicant.applicant_id == scoring_request.applicant_id).first()
+        if not applicant:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Applicant details not found for applicant {scoring_request.applicant_id}"
+            )
+            
+        # Reconstruct pandas DataFrame
+        from app.models.schemas import ScoringRequest as SchemaScoringRequest
+        from app.models.enums import GenderEnum, EducationLevel, MaritalStatus, EmploymentStatus, LoanPurpose, PaymentHistory
+        
+        request_schema = SchemaScoringRequest(
+            applicant_id=applicant.applicant_id,
+            age=applicant.age,
+            gender=GenderEnum(applicant.gender),
+            education_level=EducationLevel(applicant.education_level),
+            marital_status=MaritalStatus(applicant.marital_status),
+            income=applicant.income,
+            credit_score=applicant.credit_score,
+            loan_amount=scoring_request.loan_amount,
+            loan_purpose=LoanPurpose(scoring_request.loan_purpose),
+            employment_status=EmploymentStatus(applicant.employment_status),
+            years_at_current_job=applicant.years_at_current_job,
+            payment_history=PaymentHistory(applicant.payment_history),
+            debt_to_income_ratio=applicant.debt_to_income_ratio,
+            assets_value=applicant.assets_value,
+            previous_defaults=applicant.previous_defaults,
+            number_of_dependents=applicant.number_of_dependents,
+        )
+        
+        # Create DataFrames
+        applicant_df = scoring_service._request_to_dataframe(request_schema)
+        preprocessed_df = scoring_service.preprocessor.transform(applicant_df)
+        
+        # Explain
+        explanation_data = scoring_service.explainer.explain(
+            original_X=applicant_df,
+            preprocessed_X=preprocessed_df,
+            prediction=scoring_request.default_probability,
+        )
+        
+        # Cache
+        db_explanation = DbExplanation(
+            explanation_id=str(uuid4()),
+            request_id=request_id,
+            shap_values=explanation_data.shap_values,
+            feature_importance=[f.dict() for f in explanation_data.top_features],
+            base_value=explanation_data.base_value,
+            expected_value=explanation_data.base_value,
+            created_at=datetime.utcnow(),
+        )
+        db.add(db_explanation)
+        db.commit()
+        
+        return explanation_data
+        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Explanation retrieval error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve explanation",
+            detail=f"Failed to retrieve explanation: {str(e)}",
         )
 
 
@@ -85,30 +140,58 @@ async def get_explanation(
 async def get_waterfall_plot(
     request_id: str,
     db: Session = Depends(get_db),
+    scoring_service: ScoringService = Depends(get_scoring_service),
 ) -> dict:
-    """
-    Get SHAP waterfall plot data for visualization.
-    
-    **Returns:**
-    - base_value: Starting prediction value
-    - features: Array of feature contributions
-    - final_value: Final prediction after all features
-    
-    **Used for:**
-    - Waterfall visualizations in frontend
-    - Client presentations
-    - Fair lending documentation
-    """
+    """Get SHAP waterfall plot data for visualization."""
     try:
-        # TODO: Get SHAP values
-        # Format as waterfall data
-        # Include feature contributions in order of impact
-        pass
+        scoring_request = db.query(DbScoringRequest).filter(DbScoringRequest.request_id == request_id).first()
+        if not scoring_request:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Scoring request {request_id} not found"
+            )
+            
+        applicant = db.query(Applicant).filter(Applicant.applicant_id == scoring_request.applicant_id).first()
+        
+        from app.models.schemas import ScoringRequest as SchemaScoringRequest
+        from app.models.enums import GenderEnum, EducationLevel, MaritalStatus, EmploymentStatus, LoanPurpose, PaymentHistory
+        
+        request_schema = SchemaScoringRequest(
+            applicant_id=applicant.applicant_id,
+            age=applicant.age,
+            gender=GenderEnum(applicant.gender),
+            education_level=EducationLevel(applicant.education_level),
+            marital_status=MaritalStatus(applicant.marital_status),
+            income=applicant.income,
+            credit_score=applicant.credit_score,
+            loan_amount=scoring_request.loan_amount,
+            loan_purpose=LoanPurpose(scoring_request.loan_purpose),
+            employment_status=EmploymentStatus(applicant.employment_status),
+            years_at_current_job=applicant.years_at_current_job,
+            payment_history=PaymentHistory(applicant.payment_history),
+            debt_to_income_ratio=applicant.debt_to_income_ratio,
+            assets_value=applicant.assets_value,
+            previous_defaults=applicant.previous_defaults,
+            number_of_dependents=applicant.number_of_dependents,
+        )
+        
+        applicant_df = scoring_service._request_to_dataframe(request_schema)
+        preprocessed_df = scoring_service.preprocessor.transform(applicant_df)
+        
+        shap_values = scoring_service.explainer._compute_shap_values(preprocessed_df)
+        
+        return scoring_service.explainer.get_waterfall_data(
+            preprocessed_df,
+            shap_values
+        )
+        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Waterfall plot error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate waterfall plot",
+            detail=f"Failed to generate waterfall plot: {str(e)}",
         )
 
 
@@ -119,22 +202,57 @@ async def get_waterfall_plot(
 async def get_force_plot(
     request_id: str,
     db: Session = Depends(get_db),
+    scoring_service: ScoringService = Depends(get_scoring_service),
 ) -> dict:
-    """
-    Get SHAP force plot data.
-    
-    Shows how each feature pushes the prediction from base value to final value.
-    """
+    """Get SHAP force plot data."""
     try:
-        # TODO: Get SHAP values
-        # Format as force plot data
-        # Include positive/negative feature contributions
-        pass
+        scoring_request = db.query(DbScoringRequest).filter(DbScoringRequest.request_id == request_id).first()
+        if not scoring_request:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Scoring request {request_id} not found"
+            )
+            
+        applicant = db.query(Applicant).filter(Applicant.applicant_id == scoring_request.applicant_id).first()
+        
+        from app.models.schemas import ScoringRequest as SchemaScoringRequest
+        from app.models.enums import GenderEnum, EducationLevel, MaritalStatus, EmploymentStatus, LoanPurpose, PaymentHistory
+        
+        request_schema = SchemaScoringRequest(
+            applicant_id=applicant.applicant_id,
+            age=applicant.age,
+            gender=GenderEnum(applicant.gender),
+            education_level=EducationLevel(applicant.education_level),
+            marital_status=MaritalStatus(applicant.marital_status),
+            income=applicant.income,
+            credit_score=applicant.credit_score,
+            loan_amount=scoring_request.loan_amount,
+            loan_purpose=LoanPurpose(scoring_request.loan_purpose),
+            employment_status=EmploymentStatus(applicant.employment_status),
+            years_at_current_job=applicant.years_at_current_job,
+            payment_history=PaymentHistory(applicant.payment_history),
+            debt_to_income_ratio=applicant.debt_to_income_ratio,
+            assets_value=applicant.assets_value,
+            previous_defaults=applicant.previous_defaults,
+            number_of_dependents=applicant.number_of_dependents,
+        )
+        
+        applicant_df = scoring_service._request_to_dataframe(request_schema)
+        preprocessed_df = scoring_service.preprocessor.transform(applicant_df)
+        
+        shap_values = scoring_service.explainer._compute_shap_values(preprocessed_df)
+        
+        return scoring_service.explainer.get_force_plot_data(
+            preprocessed_df,
+            shap_values
+        )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Force plot error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate force plot",
+            detail=f"Failed to generate force plot: {str(e)}",
         )
 
 
@@ -145,24 +263,21 @@ async def get_force_plot(
 async def regenerate_explanation(
     request_id: str,
     db: Session = Depends(get_db),
+    scoring_service: ScoringService = Depends(get_scoring_service),
 ) -> ExplanationData:
-    """
-    Force regeneration of SHAP explanations.
-    
-    Useful if explanation was cached with old model version
-    or if you want to recalculate with different settings.
-    """
+    """Force regeneration of SHAP explanations, updating cache."""
     try:
-        # TODO: Get original scoring request
-        # Recompute SHAP values
-        # Update cache
-        # Return new explanation
-        pass
+        # Delete existing cached explanation
+        db.query(DbExplanation).filter(DbExplanation.request_id == request_id).delete()
+        db.commit()
+        
+        # Regenerate and cache
+        return await get_explanation(request_id=request_id, db=db, scoring_service=scoring_service)
     except Exception as e:
         logger.error(f"Regeneration error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to regenerate explanation",
+            detail=f"Failed to regenerate explanation: {str(e)}",
         )
 
 
@@ -174,25 +289,34 @@ async def get_model_feature_importance(
     model_version: str,
     db: Session = Depends(get_db),
 ) -> dict:
-    """
-    Get average feature importance for a model version.
-    
-    Based on SHAP values across all applicants scored with this model.
-    
-    **Returns:**
-    - feature_names: List of feature names
-    - importance_values: SHAP-based importance
-    - average_impact: Average impact magnitude
-    """
+    """Get average feature importance for a model version across historical requests."""
     try:
-        # TODO: Query all scores with given model version
-        # Aggregate SHAP values across requests
-        # Compute average importance per feature
-        # Return aggregated importance
-        pass
+        explanations = db.query(DbExplanation).join(
+            DbScoringRequest, DbExplanation.request_id == DbScoringRequest.request_id
+        ).filter(DbScoringRequest.model_version == model_version).all()
+        
+        if not explanations:
+            return {"feature_names": [], "importance_values": [], "average_impact": {}}
+            
+        # Aggregate SHAP values
+        sum_shaps = {}
+        count = 0
+        for exp in explanations:
+            count += 1
+            for feat, val in exp.shap_values.items():
+                sum_shaps[feat] = sum_shaps.get(feat, 0.0) + abs(val)
+                
+        avg_shaps = {k: v / count for k, v in sum_shaps.items()}
+        sorted_shaps = sorted(avg_shaps.items(), key=lambda x: x[1], reverse=True)
+        
+        return {
+            "feature_names": [x[0] for x in sorted_shaps],
+            "importance_values": [x[1] for x in sorted_shaps],
+            "average_impact": avg_shaps,
+        }
     except Exception as e:
         logger.error(f"Model importance error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve model importance",
+            detail=f"Failed to retrieve model importance: {str(e)}",
         )

@@ -4,24 +4,39 @@ Handles CSV uploads, job management, and result retrieval.
 """
 
 import logging
-from typing import Optional
+import os
+from typing import Optional, List
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.models.schemas import BatchJobResponse, BatchResultResponse, ErrorResponse
+from app.models.database import BatchJob, BatchResult
 from app.services.batch_processor import BatchProcessor
+from app.api.v1.endpoints.scoring import get_scoring_service
+from app.services.scorer import ScoringService
 from app.database.session import get_db
-from app.config import get_settings, Settings
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/batch", tags=["batch_processing"])
 
 
+def get_batch_processor(
+    db: Session = Depends(get_db),
+    scoring_service: ScoringService = Depends(get_scoring_service),
+) -> BatchProcessor:
+    """Dependency: get initialized BatchProcessor."""
+    return BatchProcessor(scoring_service=scoring_service, db=db)
+
+
 @router.post(
     "/upload",
     response_model=BatchJobResponse,
+    status_code=status.HTTP_202_ACCEPTED,
     responses={
         202: {"description": "Job created and queued"},
         413: {"description": "File too large"},
@@ -32,33 +47,9 @@ async def upload_batch(
     file: UploadFile = File(...),
     job_name: Optional[str] = None,
     db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
+    processor: BatchProcessor = Depends(get_batch_processor),
 ) -> BatchJobResponse:
-    """
-    Upload CSV file for batch portfolio scoring.
-    
-    **CSV Format Requirements:**
-    - Headers: age, gender, education_level, marital_status, income, credit_score,
-      loan_amount, loan_purpose, employment_status, years_at_current_job,
-      payment_history, debt_to_income_ratio, assets_value, number_of_dependents,
-      previous_defaults
-    - Max rows: 10,000
-    - Max file size: 100 MB
-    
-    **Returns:**
-    - job_id: Use this to check status and retrieve results
-    - status: "pending" (processing starts asynchronously)
-    - total_records: Number of applicants in file
-    
-    **Example:**
-    ```
-    POST /api/v1/batch/upload
-    Content-Type: multipart/form-data
-    
-    file: <CSV file>
-    job_name: "Q2_Portfolio_2026"
-    ```
-    """
+    """Upload CSV file for batch portfolio scoring."""
     try:
         # Check file size
         contents = await file.read()
@@ -69,14 +60,31 @@ async def upload_batch(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                 detail=f"File too large. Max size: {settings.MAX_UPLOAD_SIZE_MB}MB",
             )
+            
+        # Create uploads folder inside workspace
+        os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+        unique_filename = f"batch_{uuid4()}.csv"
+        csv_path = os.path.join(settings.UPLOAD_DIR, unique_filename)
         
-        # TODO: Implement batch job creation
-        # 1. Save CSV to disk
-        # 2. Create BatchJob record in DB
-        # 3. Queue async processing
-        # 4. Return job response with job_id
+        # Save file to disk
+        with open(csv_path, "wb") as f:
+            f.write(contents)
+            
+        # Create job
+        job_response = processor.create_batch_job(csv_file_path=csv_path, job_name=job_name)
         
-        raise NotImplementedError("Batch upload not yet implemented")
+        # Log to audit trail
+        from app.services.governance import GovernanceService
+        gov_service = GovernanceService(db)
+        gov_service.log_event(
+            event_type="batch",
+            action="batch_upload",
+            status="success",
+            job_id=job_response.job_id,
+            details={"job_name": job_response.job_name, "total_records": job_response.total_records},
+        )
+        
+        return job_response
         
     except HTTPException:
         raise
@@ -84,7 +92,7 @@ async def upload_batch(
         logger.error(f"Upload error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="File upload failed",
+            detail=f"File upload failed: {str(e)}",
         )
 
 
@@ -94,67 +102,37 @@ async def upload_batch(
 )
 async def get_batch_status(
     job_id: str,
-    db: Session = Depends(get_db),
+    processor: BatchProcessor = Depends(get_batch_processor),
 ) -> BatchJobResponse:
-    """
-    Get status and progress of a batch job.
-    
-    **Status Values:**
-    - pending: Waiting to start
-    - processing: Currently scoring applicants
-    - completed: All applicants scored
-    - failed: Job encountered an error
-    
-    **Progress:**
-    - processed_records: Number completed so far
-    - total_records: Total applicants in batch
-    """
+    """Get status and progress of a batch job."""
     try:
-        # TODO: Query BatchJob from database
-        # Return current status and progress
-        pass
+        return processor.get_batch_status(job_id)
     except Exception as e:
         logger.error(f"Status retrieval error: {e}", exc_info=True)
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve job status",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Batch job {job_id} not found",
         )
 
 
 @router.get(
     "/{job_id}/results",
-    response_model=list[BatchResultResponse],
+    response_model=List[BatchResultResponse],
 )
 async def get_batch_results(
     job_id: str,
     limit: int = 100,
     offset: int = 0,
-    db: Session = Depends(get_db),
-) -> list[BatchResultResponse]:
-    """
-    Get results from completed batch job.
-    
-    **Pagination:**
-    - limit: Number of results to return (max 1000)
-    - offset: Starting position for pagination
-    
-    **Returns:**
-    Array of scoring results with risk ratings and probabilities.
-    """
-    if limit > 1000:
-        limit = 1000
-    
+    processor: BatchProcessor = Depends(get_batch_processor),
+) -> List[BatchResultResponse]:
+    """Get results from completed batch job with pagination."""
     try:
-        # TODO: Query BatchResult records
-        # Filter by job_id
-        # Apply pagination (limit, offset)
-        # Return results
-        pass
+        return processor.get_batch_results(job_id, limit=limit, offset=offset)
     except Exception as e:
         logger.error(f"Results retrieval error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve results",
+            detail=f"Failed to retrieve results: {str(e)}",
         )
 
 
@@ -166,27 +144,21 @@ async def get_batch_summary(
     job_id: str,
     db: Session = Depends(get_db),
 ) -> dict:
-    """
-    Get portfolio-level summary metrics for batch job.
-    
-    **Returns:**
-    - ratings_distribution: Count of Low/Medium/High
-    - mean_probability: Average default probability
-    - std_probability: Standard deviation
-    - min_probability: Minimum probability
-    - max_probability: Maximum probability
-    """
-    try:
-        # TODO: Compute aggregate metrics from BatchResult records
-        # Group by risk_rating for distribution
-        # Compute mean/std/min/max of default_probability
-        pass
-    except Exception as e:
-        logger.error(f"Summary computation error: {e}", exc_info=True)
+    """Get portfolio-level summary metrics for batch job."""
+    job = db.query(BatchJob).filter(BatchJob.job_id == job_id).first()
+    if not job:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to compute summary",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Batch job {job_id} not found",
         )
+        
+    if job.status != "completed":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Summary metrics are only available for completed jobs. Current status: {job.status}",
+        )
+        
+    return job.summary_metrics or {}
 
 
 @router.post(
@@ -195,88 +167,88 @@ async def get_batch_summary(
 )
 async def cancel_batch(
     job_id: str,
-    db: Session = Depends(get_db),
+    processor: BatchProcessor = Depends(get_batch_processor),
 ) -> BatchJobResponse:
-    """
-    Cancel pending or processing batch job.
-    
-    Cannot cancel completed or failed jobs.
-    """
+    """Cancel pending or processing batch job."""
     try:
-        # TODO: Check job status
-        # If pending or processing, cancel it
-        # Update status to "cancelled"
-        # Return updated job response
-        pass
+        return processor.cancel_batch(job_id)
     except Exception as e:
         logger.error(f"Cancellation error: {e}", exc_info=True)
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to cancel batch job",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to cancel batch job: {str(e)}",
         )
 
 
 @router.get(
     "/{job_id}/download",
-    responses={
-        200: {"description": "CSV file"},
-        404: {"description": "Job not found"},
-    },
 )
 async def download_batch_results(
     job_id: str,
     format: str = "csv",
-    db: Session = Depends(get_db),
+    processor: BatchProcessor = Depends(get_batch_processor),
 ):
-    """
-    Download batch results as CSV or JSON.
-    
-    **Formats:**
-    - csv: Excel-compatible format
-    - json: JSON array format
-    """
+    """Download batch results as CSV or JSON."""
     try:
-        # TODO: Get results from database
-        # Format as CSV or JSON
-        # Return as file download
-        pass
+        filepath = await processor.export_batch_results(job_id, format=format)
+        
+        if not os.path.exists(filepath):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Export file was not generated"
+            )
+            
+        filename = os.path.basename(filepath)
+        media_type = "text/csv" if format == "csv" else "application/json"
+        
+        return FileResponse(
+            path=filepath,
+            filename=filename,
+            media_type=media_type,
+        )
     except Exception as e:
         logger.error(f"Download error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to download results",
+            detail=f"Failed to download results: {str(e)}",
         )
 
 
 @router.get(
     "/",
-    response_model=list[BatchJobResponse],
+    response_model=List[BatchJobResponse],
 )
 async def list_batch_jobs(
     status: Optional[str] = None,
     limit: int = 20,
     offset: int = 0,
     db: Session = Depends(get_db),
-) -> list[BatchJobResponse]:
-    """
-    List all batch jobs with optional filtering.
-    
-    **Filters:**
-    - status: Filter by job status (pending/processing/completed/failed)
-    
-    **Pagination:**
-    - limit: Number of results (max 100)
-    - offset: Starting position
-    """
+) -> List[BatchJobResponse]:
+    """List all batch jobs with optional status filter."""
     try:
-        # TODO: Query all BatchJob records
-        # Filter by status if provided
-        # Order by created_at DESC
-        # Apply pagination
-        pass
+        query = db.query(BatchJob)
+        if status:
+            query = query.filter(BatchJob.status == status)
+            
+        jobs = query.order_by(BatchJob.created_at.desc()).offset(offset).limit(limit).all()
+        
+        return [
+            BatchJobResponse(
+                job_id=j.job_id,
+                job_name=j.job_name,
+                status=j.status,
+                total_records=j.total_records,
+                processed_records=j.processed_records,
+                created_at=j.created_at,
+                started_at=j.started_at,
+                completed_at=j.completed_at,
+                summary_metrics=j.summary_metrics,
+            )
+            for j in jobs
+        ]
     except Exception as e:
         logger.error(f"Jobs listing error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to list batch jobs",
+            detail=f"Failed to list batch jobs: {str(e)}",
         )

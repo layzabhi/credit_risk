@@ -4,12 +4,17 @@ Manages model versioning, promotion, and compliance logging.
 """
 
 import logging
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.models.schemas import ModelRegistryEntry, AuditLogEntry, ErrorResponse
+from app.models.database import ModelRegistry, AuditLog
+from app.services.governance import GovernanceService
 from app.database.session import get_db
 
 logger = logging.getLogger(__name__)
@@ -17,39 +22,51 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/governance", tags=["governance"])
 
 
+def get_governance_service(db: Session = Depends(get_db)) -> GovernanceService:
+    """Dependency: get initialized GovernanceService."""
+    return GovernanceService(db)
+
+
 # Model Registry Endpoints
 
 @router.get(
     "/models",
-    response_model=list[ModelRegistryEntry],
+    response_model=List[ModelRegistryEntry],
 )
 async def list_models(
     status: Optional[str] = None,
-    db: Session = Depends(get_db),
-) -> list[ModelRegistryEntry]:
-    """
-    List all registered models with optional filtering.
-    
-    **Status Options:**
-    - active: Currently in use for scoring
-    - inactive: Available but not in use
-    - deprecated: Old model, kept for reference
-    
-    **Returned Info:**
-    - Version, training date, performance metrics
-    - Deployment status and promotion history
-    """
+    gov_service: GovernanceService = Depends(get_governance_service),
+) -> List[ModelRegistryEntry]:
+    """List all registered models with optional status filter."""
     try:
-        # TODO: Query ModelRegistry table
-        # Filter by status if provided
-        # Order by training_date DESC
-        # Include performance metrics
-        pass
+        models = gov_service.list_models(status=status)
+        return [
+            ModelRegistryEntry(
+                model_id=m.model_id,
+                model_name=m.model_name,
+                version=m.version,
+                model_type=m.model_type,
+                training_date=m.training_date,
+                deployment_date=m.deployment_date,
+                status=m.status,
+                metrics={
+                    "accuracy": m.accuracy or 0.0,
+                    "precision": m.precision or 0.0,
+                    "recall": m.recall or 0.0,
+                    "f1_score": m.f1_score or 0.0,
+                    "auc_roc": m.auc_roc or 0.0,
+                },
+                training_samples=m.training_samples,
+                promoted_at=m.promoted_at,
+                promoted_by=m.promoted_by,
+            )
+            for m in models
+        ]
     except Exception as e:
         logger.error(f"Model listing error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to list models",
+            detail=f"Failed to list models: {str(e)}",
         )
 
 
@@ -57,28 +74,37 @@ async def list_models(
     "/models/{model_id}",
     response_model=ModelRegistryEntry,
 )
-async def get_model_info(
+async def get_model_info_endpoint(
     model_id: str,
-    db: Session = Depends(get_db),
+    gov_service: GovernanceService = Depends(get_governance_service),
 ) -> ModelRegistryEntry:
-    """
-    Get detailed information about a specific model.
-    
-    **Includes:**
-    - Performance metrics (accuracy, precision, recall, F1, AUC)
-    - Training information (date, samples, duration)
-    - Deployment history
-    - Promotion records
-    """
+    """Get detailed information about a specific model version."""
     try:
-        # TODO: Query ModelRegistry by model_id
-        # Return full model info
-        pass
+        m = gov_service.get_model_info(model_id)
+        return ModelRegistryEntry(
+            model_id=m.model_id,
+            model_name=m.model_name,
+            version=m.version,
+            model_type=m.model_type,
+            training_date=m.training_date,
+            deployment_date=m.deployment_date,
+            status=m.status,
+            metrics={
+                "accuracy": m.accuracy or 0.0,
+                "precision": m.precision or 0.0,
+                "recall": m.recall or 0.0,
+                "f1_score": m.f1_score or 0.0,
+                "auc_roc": m.auc_roc or 0.0,
+            },
+            training_samples=m.training_samples,
+            promoted_at=m.promoted_at,
+            promoted_by=m.promoted_by,
+        )
     except Exception as e:
         logger.error(f"Model info retrieval error: {e}", exc_info=True)
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Model not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Model {model_id} not found: {str(e)}",
         )
 
 
@@ -87,37 +113,44 @@ async def get_model_info(
     response_model=ModelRegistryEntry,
     status_code=status.HTTP_202_ACCEPTED,
 )
-async def promote_model(
+async def promote_model_endpoint(
     model_id: str,
-    db: Session = Depends(get_db),
+    user_id: str = "admin",
+    gov_service: GovernanceService = Depends(get_governance_service),
 ) -> ModelRegistryEntry:
-    """
-    Promote a model to production status.
-    
-    **Prerequisites:**
-    - Model must pass validation tests
-    - Performance metrics must meet thresholds
-    - Approval from governance team recommended
-    
-    **Effects:**
-    - Sets is_production = true
-    - Updates primary scoring endpoint
-    - Creates audit log entry
-    - Enables monitoring for this model
-    """
+    """Promote a model version to production."""
     try:
-        # TODO: Get model from ModelRegistry
-        # Validate model is ready for promotion
-        # Check performance metrics
-        # Promote to production
-        # Create audit log entry
-        # Update primary model configuration
-        pass
+        m = gov_service.promote_model(model_id, user_id=user_id)
+        
+        # Dynamically tell model loader to switch primary model
+        from app.main import model_loader
+        if model_loader is not None:
+            model_loader.set_primary_model(m.model_name)
+            
+        return ModelRegistryEntry(
+            model_id=m.model_id,
+            model_name=m.model_name,
+            version=m.version,
+            model_type=m.model_type,
+            training_date=m.training_date,
+            deployment_date=m.deployment_date,
+            status=m.status,
+            metrics={
+                "accuracy": m.accuracy or 0.0,
+                "precision": m.precision or 0.0,
+                "recall": m.recall or 0.0,
+                "f1_score": m.f1_score or 0.0,
+                "auc_roc": m.auc_roc or 0.0,
+            },
+            training_samples=m.training_samples,
+            promoted_at=m.promoted_at,
+            promoted_by=m.promoted_by,
+        )
     except Exception as e:
         logger.error(f"Model promotion error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Model promotion failed",
+            detail=f"Model promotion failed: {str(e)}",
         )
 
 
@@ -125,56 +158,81 @@ async def promote_model(
     "/models/{model_id}/rollback",
     response_model=ModelRegistryEntry,
 )
-async def rollback_model(
+async def rollback_model_endpoint(
     model_id: str,
-    db: Session = Depends(get_db),
+    user_id: str = "admin",
+    gov_service: GovernanceService = Depends(get_governance_service),
 ) -> ModelRegistryEntry:
-    """
-    Rollback to a previous model version.
-    
-    Used if current production model has issues.
-    """
+    """Rollback production model to a previous version."""
     try:
-        # TODO: Get current production model
-        # Get previous version to roll back to
-        # Update primary model pointer
-        # Create audit log entry
-        # Notify monitoring systems
-        pass
+        m = gov_service.rollback_model(model_id, user_id=user_id)
+        
+        # Dynamically switch model loader
+        from app.main import model_loader
+        if model_loader is not None:
+            model_loader.set_primary_model(m.model_name)
+            
+        return ModelRegistryEntry(
+            model_id=m.model_id,
+            model_name=m.model_name,
+            version=m.version,
+            model_type=m.model_type,
+            training_date=m.training_date,
+            deployment_date=m.deployment_date,
+            status=m.status,
+            metrics={
+                "accuracy": m.accuracy or 0.0,
+                "precision": m.precision or 0.0,
+                "recall": m.recall or 0.0,
+                "f1_score": m.f1_score or 0.0,
+                "auc_roc": m.auc_roc or 0.0,
+            },
+            training_samples=m.training_samples,
+            promoted_at=m.promoted_at,
+            promoted_by=m.promoted_by,
+        )
     except Exception as e:
         logger.error(f"Rollback error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Model rollback failed",
+            detail=f"Model rollback failed: {str(e)}",
         )
 
 
 @router.get(
     "/models/compare",
-    response_model=list[dict],
+    response_model=List[dict],
 )
 async def compare_models(
-    model_ids: list[str],
+    model_ids: List[str],
     db: Session = Depends(get_db),
-) -> list[dict]:
-    """
-    Compare performance metrics of multiple models.
-    
-    **Use Cases:**
-    - Deciding which model to promote
-    - A/B testing comparison
-    - Performance regression detection
-    """
+) -> List[dict]:
+    """Compare performance metrics of multiple models side-by-side."""
     try:
-        # TODO: Get models by IDs
-        # Return side-by-side comparison
-        # Include metrics, training info, performance
-        pass
+        models = db.query(ModelRegistry).filter(ModelRegistry.model_id.in_(model_ids)).all()
+        return [
+            {
+                "model_id": m.model_id,
+                "model_name": m.model_name,
+                "version": m.version,
+                "metrics": {
+                    "accuracy": m.accuracy,
+                    "precision": m.precision,
+                    "recall": m.recall,
+                    "f1_score": m.f1_score,
+                    "auc_roc": m.auc_roc,
+                },
+                "training_samples": m.training_samples,
+                "training_date": m.training_date,
+                "status": m.status,
+            }
+            for m in models
+        ]
     except Exception as e:
         logger.error(f"Model comparison error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to compare models",
+            detail=f"Failed to compare models: {str(e)}",
         )
 
 
@@ -182,83 +240,61 @@ async def compare_models(
 
 @router.get(
     "/audit",
-    response_model=list[AuditLogEntry],
+    response_model=List[AuditLogEntry],
 )
 async def get_audit_logs(
     event_type: Optional[str] = None,
     days: int = 7,
     limit: int = 100,
     offset: int = 0,
-    db: Session = Depends(get_db),
-) -> list[AuditLogEntry]:
-    """
-    Get audit logs for compliance and debugging.
-    
-    **Event Types:**
-    - score: Individual scoring requests
-    - batch: Batch job lifecycle
-    - governance: Model promotions/rollbacks
-    - error: System errors and failures
-    
-    **Filters:**
-    - event_type: Filter by event type
-    - days: Last N days of logs (default 7)
-    - Pagination: limit and offset
-    
-    **Use Cases:**
-    - Compliance reporting (Fair Lending Act, etc.)
-    - Debugging scoring issues
-    - Model performance audits
-    """
+    gov_service: GovernanceService = Depends(get_governance_service),
+) -> List[AuditLogEntry]:
+    """Get audit logs for compliance and debugging."""
     try:
-        # TODO: Query AuditLog table
-        # Filter by event_type if provided
-        # Filter by timestamp (last N days)
-        # Order by timestamp DESC
-        # Apply pagination
-        pass
+        logs = gov_service.get_audit_logs(event_type=event_type, days=days, limit=limit, offset=offset)
+        return [
+            AuditLogEntry(
+                log_id=l.log_id,
+                timestamp=l.timestamp,
+                event_type=l.event_type,
+                user_id=l.user_id,
+                applicant_id=l.applicant_id,
+                job_id=l.job_id,
+                action=l.action,
+                status=l.status,
+                details=l.details,
+            )
+            for l in logs
+        ]
     except Exception as e:
         logger.error(f"Audit log retrieval error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve audit logs",
+            detail=f"Failed to retrieve audit logs: {str(e)}",
         )
 
 
 @router.get(
     "/audit/export",
-    responses={
-        200: {"description": "CSV or JSON file"},
-    },
 )
 async def export_audit_logs(
     start_date: str,  # YYYY-MM-DD
     end_date: str,    # YYYY-MM-DD
     format: str = "csv",  # csv or json
-    db: Session = Depends(get_db),
+    gov_service: GovernanceService = Depends(get_governance_service),
 ):
-    """
-    Export audit logs for external compliance reporting.
-    
-    **Formats:**
-    - csv: Excel-compatible
-    - json: Structured JSON
-    
-    **Use Cases:**
-    - Regulatory compliance reporting
-    - External audits
-    - Data archival
-    """
+    """Export audit logs for external compliance reporting."""
     try:
-        # TODO: Query audit logs in date range
-        # Export to requested format
-        # Return as file download
-        pass
+        filepath = gov_service.export_audit_logs(start_date, end_date, format=format)
+        import os
+        filename = os.path.basename(filepath)
+        media_type = "text/csv" if format == "csv" else "application/json"
+        return FileResponse(path=filepath, filename=filename, media_type=media_type)
     except Exception as e:
         logger.error(f"Audit export error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to export audit logs",
+            detail=f"Failed to export audit logs: {str(e)}",
         )
 
 
@@ -270,28 +306,38 @@ async def get_audit_summary(
     days: int = 7,
     db: Session = Depends(get_db),
 ) -> dict:
-    """
-    Get summary statistics of audit logs.
-    
-    **Returns:**
-    - total_events: Total number of events
-    - events_by_type: Count by event type
-    - success_rate: Percentage of successful events
-    - error_count: Number of errors
-    - unique_users: Number of unique users
-    """
+    """Get aggregate audit summary statistics."""
     try:
-        # TODO: Aggregate audit log statistics
-        # Group by event_type
-        # Calculate success rate
-        # Count errors
-        # Return summary dict
-        pass
+        start_time = datetime.utcnow() - timedelta(days=days)
+        total_events = db.query(AuditLog).filter(AuditLog.timestamp >= start_time).count()
+        success_count = db.query(AuditLog).filter(
+            AuditLog.timestamp >= start_time, AuditLog.status == "success"
+        ).count()
+        error_count = db.query(AuditLog).filter(
+            AuditLog.timestamp >= start_time, AuditLog.status == "failure"
+        ).count()
+        unique_users = db.query(AuditLog.user_id).filter(AuditLog.timestamp >= start_time).distinct().count()
+        
+        # Events by type
+        by_type_query = db.query(AuditLog.event_type, func.count(AuditLog.log_id)).filter(
+            AuditLog.timestamp >= start_time
+        ).group_by(AuditLog.event_type).all()
+        events_by_type = {k: v for k, v in by_type_query}
+        
+        success_rate = (success_count / total_events) if total_events > 0 else 1.0
+        
+        return {
+            "total_events": total_events,
+            "events_by_type": events_by_type,
+            "success_rate": success_rate,
+            "error_count": error_count,
+            "unique_users": unique_users,
+        }
     except Exception as e:
         logger.error(f"Audit summary error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to compute audit summary",
+            detail=f"Failed to compute audit summary: {str(e)}",
         )
 
 
@@ -303,39 +349,18 @@ async def get_audit_summary(
 )
 async def get_fairness_report(
     model_id: str,
-    protected_attributes: list[str] = ["gender", "age"],
-    db: Session = Depends(get_db),
+    protected_attributes: Optional[List[str]] = None,
+    gov_service: GovernanceService = Depends(get_governance_service),
 ) -> dict:
-    """
-    Get fairness analysis report for a model.
-    
-    **Checks:**
-    - Disparate Impact Analysis
-    - Demographic Parity
-    - Equalized Odds
-    - Equal Opportunity
-    
-    **Protected Attributes:**
-    - gender: Male/Female comparison
-    - age: Age group comparison
-    - education: Education level comparison
-    
-    **Use Cases:**
-    - Fair Lending Act compliance
-    - Bias auditing
-    - Regulatory reporting
-    """
+    """Get fairness report checking for demographic bias."""
     try:
-        # TODO: Get all scores with given model
-        # Group by protected attributes
-        # Compute fairness metrics
-        # Return fairness report
-        pass
+        attrs = protected_attributes or ["gender", "age"]
+        return gov_service.get_fairness_report(model_id, protected_attributes=attrs)
     except Exception as e:
         logger.error(f"Fairness report error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate fairness report",
+            detail=f"Failed to generate fairness report: {str(e)}",
         )
 
 
@@ -345,31 +370,14 @@ async def get_fairness_report(
 )
 async def get_performance_report(
     model_id: str,
-    db: Session = Depends(get_db),
+    gov_service: GovernanceService = Depends(get_governance_service),
 ) -> dict:
-    """
-    Get model performance report.
-    
-    **Metrics:**
-    - Accuracy, Precision, Recall, F1-Score
-    - AUC-ROC, Confusion Matrix
-    - Calibration curves
-    - Threshold analysis
-    
-    **Segments:**
-    - Overall performance
-    - By risk rating (Low/Medium/High)
-    - By demographic groups
-    """
+    """Get model performance report from registry metrics."""
     try:
-        # TODO: Get all scores with given model
-        # Compute performance metrics
-        # Segment analysis
-        # Return performance report
-        pass
+        return gov_service.get_performance_report(model_id)
     except Exception as e:
         logger.error(f"Performance report error: {e}", exc_info=True)
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate performance report",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Failed to generate performance report: {str(e)}",
         )

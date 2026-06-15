@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.engine import Engine
 
 from app.config import settings
+from app.models.database import Base
 
 logger = logging.getLogger(__name__)
 

@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: credit_risk_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: credit_risk
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - credit_risk_network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: credit_risk_backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/credit_risk
+      SECRET_KEY: dev-secret-key-change-in-production
+      DEBUG: "true"
+      MODELS_DIR: /app/ml_models
+      LOG_LEVEL: INFO
+    volumes:
+      - ./backend:/app
+      - ./ml_training/models:/app/ml_models
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - credit_risk_network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: credit_risk_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:8000/api/v1
+      REACT_APP_ENVIRONMENT: development
+    
+    depends_on:
+      - backend
+    networks:
+      - credit_risk_network
+
+  # Adminer (Database GUI)
+  adminer:
+    image: adminer:latest
+    container_name: credit_risk_adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - credit_risk_network
+
+volumes:
+  postgres_data:
+
+networks:
+  credit_risk_network:
+    driver: bridge
