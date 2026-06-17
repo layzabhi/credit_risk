@@ -55,3 +55,12 @@ def test_preprocessor_fit_transform(sample_request_dict):
     # Verify standard scaling applied (mean approx 0)
     # Since we have only 3 samples, we check that the scaled credit score is numeric
     assert isinstance(transformed.iloc[0]["credit_score"], (float, np.float64))
+
+
+def test_legacy_preprocessor_version():
+    """Test that LegacyDataPreprocessor has the version attribute."""
+    from app.services.model_loader import LegacyDataPreprocessor
+    preprocessor = LegacyDataPreprocessor()
+    assert hasattr(preprocessor, "version")
+    assert preprocessor.version == "1.0"
+

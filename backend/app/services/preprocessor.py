@@ -55,6 +55,8 @@ class DataPreprocessor:
         """
         logger.info(f"Fitting preprocessor on {len(X)} rows...")
         X_copy = X.copy()
+        if "applicant_id" in X_copy.columns:
+            X_copy = X_copy.drop(columns=["applicant_id"])
         
         # 1. Fit categorical encoders
         for col in self.categorical_cols:
@@ -74,8 +76,11 @@ class DataPreprocessor:
         X_engineered = self._engineer_features(X_encoded)
         
         # 3. Fit scaler on numerical columns
-        # All columns not in categorical_cols are numerical
-        self.numerical_cols = [col for col in X_engineered.columns if col not in self.categorical_cols]
+        # All columns not in categorical_cols that are numeric are numerical
+        self.numerical_cols = [
+            col for col in X_engineered.columns 
+            if col not in self.categorical_cols and pd.api.types.is_numeric_dtype(X_engineered[col])
+        ]
         
         if self.numerical_cols:
             # Fill NaNs with median/mean before scaling
@@ -101,6 +106,8 @@ class DataPreprocessor:
             raise ValueError("Preprocessor has not been fitted yet.")
             
         X_copy = X.copy()
+        if "applicant_id" in X_copy.columns:
+            X_copy = X_copy.drop(columns=["applicant_id"])
         
         # 1. Encode categorical features
         X_encoded = self._encode_categorical(X_copy, fit=False)

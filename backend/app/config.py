@@ -33,7 +33,7 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS
-    ALLOWED_HOSTS: str = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1")
+    ALLOWED_HOSTS: str = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver")
     CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8000")
     
     # Models
@@ -41,19 +41,9 @@ class Settings:
     PRIMARY_MODEL: str = os.getenv("PRIMARY_MODEL", "xgboost")
     
     # Feature flags
-    ENABLE_BATCH_PROCESSING: bool = True
     ENABLE_SHAP_EXPLANATIONS: bool = True
-    ENABLE_AUDIT_LOGGING: bool = True
-    ENABLE_GOVERNANCE: bool = True
     
     # Rate limiting
-    RATE_LIMIT_PER_MINUTE: int = 100
-    RATE_LIMIT_PER_HOUR: int = 5000
-    
-    # Batch processing
-    BATCH_MAX_SIZE: int = 10000
-    BATCH_TIMEOUT_SECONDS: int = 300
-    BATCH_WORKER_COUNT: int = 4
     
     # File storage
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./uploads")

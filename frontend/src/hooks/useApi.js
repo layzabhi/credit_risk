@@ -15,7 +15,7 @@ export function useApi() {
    * @returns {string} Full API URL
    */
   const buildUrl = useCallback((endpoint) => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
     const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     return `${baseUrl}${path}`;
   }, []);

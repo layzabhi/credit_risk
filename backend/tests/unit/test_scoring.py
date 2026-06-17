@@ -7,7 +7,7 @@ import pytest
 
 from app.services.scorer import ScoringService, ThresholdTuner
 from app.models.schemas import RiskRating
-from tests.fixtures.sample_data import sample_request
+from tests.fixtures.sample_data import sample_request, sample_request_dict
 
 
 class DummyModel:

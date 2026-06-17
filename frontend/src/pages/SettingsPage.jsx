@@ -3,9 +3,6 @@ import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
 import { User, Lock, Bell, LogOut, Save, AlertCircle, CheckCircle } from 'lucide-react';
 
-/**
- * SettingsPage - User settings, preferences, and account management
- */
 export function SettingsPage() {
   const { user, logout, updateProfile } = useAuth();
   const { put } = useApi();
@@ -120,48 +117,50 @@ export function SettingsPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-8 animate-fadeIn text-on-surface">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-1">Manage your account and preferences</p>
+        <h1 className="text-3xl font-headline font-bold text-on-surface tracking-tight">Settings</h1>
+        <p className="text-on-surface-variant text-sm mt-1">Manage your account and preferences</p>
       </div>
 
       {/* Message Alert */}
       {message && (
-        <div className={`rounded-lg border p-4 flex items-start gap-3 ${
+        <div className={`p-4 rounded-2xl border flex items-start gap-3 max-w-2xl ${
           message.type === 'success'
-            ? 'bg-green-50 border-green-200'
-            : 'bg-red-50 border-red-200'
+            ? 'bg-green-50 border-green-200 text-green-800'
+            : 'bg-red-50 border-red-200 text-red-800'
         }`}>
           {message.type === 'success' ? (
             <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           )}
           <div>
-            <p className={message.type === 'success' ? 'text-green-800' : 'text-red-800'}>
-              {message.text}
-            </p>
+            <p className="font-bold text-xs capitalize">{message.type}</p>
+            <p className="text-xs">{message.text}</p>
           </div>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200 bg-white rounded-t-lg px-6 pt-4">
+      <div className="flex gap-2 p-1 rounded-2xl neo-inset bg-[#e8eaf0] w-fit">
         {tabs.map(tab => {
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 font-medium border-b-2 transition-colors ${
+              onClick={() => {
+                setActiveTab(tab.id);
+                setMessage(null);
+              }}
+              className={`flex items-center gap-2 px-4 py-2 font-bold text-xs rounded-xl transition-all ${
                 activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'neo-raised text-primary bg-[#e8eaf0]'
+                  : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5" />
               {tab.label}
             </button>
           );
@@ -169,51 +168,61 @@ export function SettingsPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white rounded-b-lg border border-gray-200 p-6 max-w-2xl">
+      <div className="bg-background rounded-3xl p-8 max-w-2xl neo-raised space-y-6">
         {/* Profile Tab */}
         {activeTab === 'profile' && (
-          <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-              <input
-                type="text"
-                name="first_name"
-                value={profileData.first_name}
-                onChange={handleProfileChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+          <form onSubmit={handleSaveProfile} className="space-y-5">
+            <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-4 border-b border-gray-300/20 pb-3">
+              Profile Settings
+            </h3>
+            
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">First Name</label>
+              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+                <input
+                  type="text"
+                  name="first_name"
+                  value={profileData.first_name}
+                  onChange={handleProfileChange}
+                  className="w-full bg-transparent border-none focus:ring-0 text-xs text-on-surface p-2 font-medium"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-              <input
-                type="text"
-                name="last_name"
-                value={profileData.last_name}
-                onChange={handleProfileChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">Last Name</label>
+              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+                <input
+                  type="text"
+                  name="last_name"
+                  value={profileData.last_name}
+                  onChange={handleProfileChange}
+                  className="w-full bg-transparent border-none focus:ring-0 text-xs text-on-surface p-2 font-medium"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={profileData.email}
-                onChange={handleProfileChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">Email Address</label>
+              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+                <input
+                  type="email"
+                  name="email"
+                  value={profileData.email}
+                  onChange={handleProfileChange}
+                  className="w-full bg-transparent border-none focus:ring-0 text-xs text-on-surface p-2 font-medium"
+                />
+              </div>
             </div>
 
-            <div className="flex gap-3 pt-4">
+            <div className="pt-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                className="px-6 py-3 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs neo-raised transition-all flex items-center gap-2"
               >
-                <Save className="w-4 h-4" />
-                Save Changes
+                <Save className="w-4 h-4 text-white" />
+                {loading ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </form>
@@ -221,48 +230,61 @@ export function SettingsPage() {
 
         {/* Password Tab */}
         {activeTab === 'password' && (
-          <form onSubmit={handleChangePassword} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-              <input
-                type="password"
-                name="current_password"
-                value={passwordData.current_password}
-                onChange={handlePasswordChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+          <form onSubmit={handleChangePassword} className="space-y-5">
+            <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-4 border-b border-gray-300/20 pb-3">
+              Change Password
+            </h3>
+
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">Current Password</label>
+              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+                <input
+                  type="password"
+                  name="current_password"
+                  value={passwordData.current_password}
+                  onChange={handlePasswordChange}
+                  className="w-full bg-transparent border-none focus:ring-0 text-xs text-on-surface p-2 font-medium"
+                  required
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-              <input
-                type="password"
-                name="new_password"
-                value={passwordData.new_password}
-                onChange={handlePasswordChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">New Password</label>
+              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+                <input
+                  type="password"
+                  name="new_password"
+                  value={passwordData.new_password}
+                  onChange={handlePasswordChange}
+                  className="w-full bg-transparent border-none focus:ring-0 text-xs text-on-surface p-2 font-medium"
+                  required
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-              <input
-                type="password"
-                name="confirm_password"
-                value={passwordData.confirm_password}
-                onChange={handlePasswordChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">Confirm New Password</label>
+              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+                <input
+                  type="password"
+                  name="confirm_password"
+                  value={passwordData.confirm_password}
+                  onChange={handlePasswordChange}
+                  className="w-full bg-transparent border-none focus:ring-0 text-xs text-on-surface p-2 font-medium"
+                  required
+                />
+              </div>
             </div>
 
-            <div className="flex gap-3 pt-4">
+            <div className="pt-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                className="px-6 py-3 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs neo-raised transition-all flex items-center gap-2"
               >
-                <Lock className="w-4 h-4" />
-                Change Password
+                <Lock className="w-4 h-4 text-white" />
+                {loading ? 'Changing...' : 'Change Password'}
               </button>
             </div>
           </form>
@@ -270,57 +292,63 @@ export function SettingsPage() {
 
         {/* Notifications Tab */}
         {activeTab === 'notifications' && (
-          <form onSubmit={handleSavePreferences} className="space-y-4">
-            <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <input
-                type="checkbox"
-                name="email_notifications"
-                checked={preferences.email_notifications}
-                onChange={handlePreferenceChange}
-                className="w-4 h-4 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              />
-              <div>
-                <p className="font-medium text-gray-900">Email Notifications</p>
-                <p className="text-sm text-gray-600">Receive important updates via email</p>
-              </div>
-            </label>
+          <form onSubmit={handleSavePreferences} className="space-y-5">
+            <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-4 border-b border-gray-300/20 pb-3">
+              Notification Preferences
+            </h3>
 
-            <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <input
-                type="checkbox"
-                name="daily_digest"
-                checked={preferences.daily_digest}
-                onChange={handlePreferenceChange}
-                className="w-4 h-4 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              />
-              <div>
-                <p className="font-medium text-gray-900">Daily Digest</p>
-                <p className="text-sm text-gray-600">Get a daily summary of your activities</p>
-              </div>
-            </label>
+            <div className="space-y-4">
+              <label className="flex items-center gap-3 p-4 rounded-2xl neo-inset bg-[#e2e4ea] cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="email_notifications"
+                  checked={preferences.email_notifications}
+                  onChange={handlePreferenceChange}
+                  className="w-4 h-4 text-primary border-gray-300/60 rounded focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                />
+                <div>
+                  <p className="text-xs font-bold text-on-surface">Email Notifications</p>
+                  <p className="text-[10px] text-on-surface-variant mt-0.5">Receive updates via email</p>
+                </div>
+              </label>
 
-            <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-              <input
-                type="checkbox"
-                name="risk_alerts"
-                checked={preferences.risk_alerts}
-                onChange={handlePreferenceChange}
-                className="w-4 h-4 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              />
-              <div>
-                <p className="font-medium text-gray-900">High-Risk Alerts</p>
-                <p className="text-sm text-gray-600">Be notified when high-risk applications are detected</p>
-              </div>
-            </label>
+              <label className="flex items-center gap-3 p-4 rounded-2xl neo-inset bg-[#e2e4ea] cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="daily_digest"
+                  checked={preferences.daily_digest}
+                  onChange={handlePreferenceChange}
+                  className="w-4 h-4 text-primary border-gray-300/60 rounded focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                />
+                <div>
+                  <p className="text-xs font-bold text-on-surface">Daily Summary Digest</p>
+                  <p className="text-[10px] text-on-surface-variant mt-0.5">Receive a daily performance summary</p>
+                </div>
+              </label>
 
-            <div className="flex gap-3 pt-4">
+              <label className="flex items-center gap-3 p-4 rounded-2xl neo-inset bg-[#e2e4ea] cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="risk_alerts"
+                  checked={preferences.risk_alerts}
+                  onChange={handlePreferenceChange}
+                  className="w-4 h-4 text-primary border-gray-300/60 rounded focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                />
+                <div>
+                  <p className="text-xs font-bold text-on-surface">High-Risk Alerts</p>
+                  <p className="text-[10px] text-on-surface-variant mt-0.5">Be notified immediately when high-risk profiles are scored</p>
+                </div>
+              </label>
+            </div>
+
+            <div className="pt-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                className="px-6 py-3 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs neo-raised transition-all flex items-center gap-2"
               >
-                <Save className="w-4 h-4" />
-                Save Preferences
+                <Save className="w-4 h-4 text-white" />
+                {loading ? 'Saving...' : 'Save Preferences'}
               </button>
             </div>
           </form>
@@ -328,16 +356,16 @@ export function SettingsPage() {
       </div>
 
       {/* Danger Zone */}
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl">
-        <h3 className="text-lg font-semibold text-red-900 mb-4">Danger Zone</h3>
+      <div className="bg-red-500/5 border border-red-500/20 rounded-3xl p-8 max-w-2xl neo-raised">
+        <h3 className="text-base font-bold text-red-600 mb-2 font-headline uppercase tracking-wider">Danger Zone</h3>
+        <p className="text-xs text-on-surface-variant mb-6">Logging out will invalidate your session on this browser.</p>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all shadow-md active:scale-95 hover:scale-102"
         >
-          <LogOut className="w-4 h-4" />
-          Logout
+          <LogOut className="w-4 h-4 text-white" />
+          Logout Session
         </button>
-        <p className="text-sm text-red-700 mt-2">You will be logged out from all sessions</p>
       </div>
     </div>
   );

@@ -119,61 +119,6 @@ class ScoringRequestParams:
         self.include_feature_importance = include_feature_importance
 
 
-# Batch processing dependencies
-class BatchQueryParams:
-    """Parameters for batch processing queries."""
-
-    def __init__(
-        self,
-        pagination: PaginationParams = Depends(),
-        status: Optional[str] = Query(None, description="Filter by job status"),
-        include_results: bool = Query(
-            False,
-            description="Include detailed scoring results",
-        ),
-    ):
-        """Initialize batch query params."""
-        self.pagination = pagination
-        self.status = status
-        self.include_results = include_results
-
-
-# Audit log dependencies
-class AuditLogParams:
-    """Parameters for audit log queries."""
-
-    def __init__(
-        self,
-        pagination: PaginationParams = Depends(),
-        event_type: Optional[str] = Query(None, description="Filter by event type"),
-        user_id: Optional[str] = Query(None, description="Filter by user ID"),
-        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
-    ):
-        """Initialize audit log params."""
-        self.pagination = pagination
-        self.event_type = event_type
-        self.user_id = user_id
-        self.start_date = start_date
-        self.end_date = end_date
-
-
-# Model registry dependencies
-class ModelRegistryParams:
-    """Parameters for model registry queries."""
-
-    def __init__(
-        self,
-        pagination: PaginationParams = Depends(),
-        model_type: Optional[str] = Query(None, description="Filter by model type"),
-        status: Optional[str] = Query(None, description="Filter by model status"),
-    ):
-        """Initialize model registry params."""
-        self.pagination = pagination
-        self.model_type = model_type
-        self.status = status
-
-
 # Dashboard dependencies
 class DashboardParams:
     """Parameters for dashboard queries."""

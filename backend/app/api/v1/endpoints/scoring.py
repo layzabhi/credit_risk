@@ -13,7 +13,6 @@ from sqlalchemy.orm import Session
 from app.models.schemas import ScoringRequest, ScoringResponse, ErrorResponse
 from app.models.database import Applicant, ScoringRequest as DbScoringRequest
 from app.services.scorer import ScoringService, ThresholdTuner
-from app.services.governance import GovernanceService
 from app.database.session import get_db
 from app.core.exceptions import ValidationException, ModelException
 
@@ -35,14 +34,21 @@ def get_scoring_service(db: Session = Depends(get_db)) -> ScoringService:
         loader = ModelLoader(model_dir=settings.MODELS_DIR)
         # We block synchronously for initialization in this fallback
         import asyncio
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+            
+        if loop and loop.is_running():
             # In async loop, schedule loading
             import nest_asyncio
             nest_asyncio.apply()
             loop.run_until_complete(loader.load_models())
         else:
             asyncio.run(loader.load_models())
+            
+        import app.main
+        app.main.model_loader = loader
         model_loader = loader
 
     try:
@@ -131,28 +137,11 @@ async def score_applicant(
             confidence_score=response.confidence_score,
             processing_time_ms=response.processing_time_ms,
             explanations=response.explanations.dict(),
-            audit_trail=response.audit_trail,
+            audit_trail=response.audit_trail.dict(),
             created_at=response.scoring_timestamp,
         )
         db.add(db_request)
         db.commit()
-        
-        # 4. Log to audit trail
-        gov_service = GovernanceService(db)
-        gov_service.log_event(
-            event_type="score",
-            action="single_score",
-            status="success",
-            applicant_id=response.applicant_id,
-            request_id=db_request.request_id,
-            model_id=response.model_version,
-            details={
-                "risk_rating": response.risk_rating.value,
-                "default_probability": response.default_probability,
-                "confidence_score": response.confidence_score,
-            },
-            duration_ms=response.processing_time_ms,
-        )
         
         return response
         
