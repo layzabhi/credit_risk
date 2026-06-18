@@ -116,10 +116,7 @@ export function RegisterPage() {
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-lg mb-4">
-            <span className="text-2xl font-bold text-blue-600">CR</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">Credit Risk</h1>
+          <h1 className="text-3xl font-bold text-gray-900">RiskLens</h1>
           <p className="text-gray-600 mt-1">Create Your Account</p>
         </div>
 
@@ -338,7 +335,7 @@ export function RegisterPage() {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-600 mt-6">
-          © 2024 Credit Risk Assessment. All rights reserved.
+          © 2024 RiskLens Assessment. All rights reserved.
         </p>
       </div>
     </div>

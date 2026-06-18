@@ -12,6 +12,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 import uvicorn
 
@@ -178,7 +179,7 @@ async def health_check():
     try:
         db = next(get_db())
         # Simple query to verify connection
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         health_status["database"] = "connected"
     except Exception as e:
         logger.warning(f"Database health check failed: {e}")
@@ -189,7 +190,7 @@ async def health_check():
 
 
 # Include API routes
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix="/api")
 
 
 @app.get("/", tags=["System"])

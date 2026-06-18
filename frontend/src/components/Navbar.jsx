@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Menu, X, Bell, User, LogOut, Settings } from 'lucide-react';
+import { Bell, User, LogOut, Settings, Sun, Moon } from 'lucide-react';
 
-/**
- * Navbar component - Top navigation bar with user menu
- */
 export function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout, isAuthenticated } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -21,105 +19,101 @@ export function Navbar() {
     return null;
   }
 
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case '/': return 'Dashboard';
+      case '/scoring': return 'Prediction';
+      case '/explainability': return 'Explainability';
+      case '/model-performance': return 'Model Performance';
+      case '/dataset-insights': return 'Dataset Insights';
+      case '/about-project': return 'About Project';
+      case '/settings': return 'Settings';
+      default: return 'Dashboard';
+    }
+  };
+
+  const profileName = user?.first_name && user?.last_name 
+    ? `${user.first_name} ${user.last_name}` 
+    : 'Erika Collins';
+    
+  const profileRole = user?.role ? user.role : 'Super Admin';
+  
+  const profileAvatar = user?.avatar_url 
+    ? user.avatar_url 
+    : 'https://lh3.googleusercontent.com/aida-public/AB6AXuD1Wd-93wgoXC4k07ApnPQ45jcoyudQ9cKTE2JuYOk-In8vt_sSkWpM7cF4eK1rwsvt9bxpfJBju3v0VLfxlk477fq4ZQmAK3lvc9UgpSVDHlkiHJgA3R2HYaWmZrWWyXAwKXc_cKn_ODlidMPIvs4Acciry_F7ikJzQv-ZGpVDfGHZTGsJKk0HmcZiBDRzabX0FfsiyBwWKgBgYUym_c9wFvQIpAk8mKBpfwb4CwFYdaF1cL6Yiq2WNjc-BhRKC_QQsDtoUfdcgK0';
+
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">CR</span>
-            </div>
-            <span className="font-bold text-gray-900 hidden sm:inline">Credit Risk</span>
-          </div>
+    <nav className="bg-transparent px-8 pt-6 pb-2 flex justify-between items-center z-10 shrink-0">
+      {/* Left side title */}
+      <h2 className="text-sm font-medium text-slate-500">
+        <b>{getPageTitle()}</b>
+      </h2>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8">
-            <div className="flex items-center gap-4">
-              {/* Notifications */}
-              <button className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+      {/* Right side items */}
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
+          {/* Day / Night Mode Toggle */}
+          <button 
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
 
-              {/* Profile Menu */}
-              <div className="relative">
+          {/* Notifications */}
+          <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors relative">
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 border-2 border-[#f8f9ff] rounded-full"></span>
+          </button>
+
+          {/* Profile Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              className="flex items-center gap-3 ml-2 cursor-pointer hover:opacity-90 transition-opacity focus:outline-none"
+            >
+              <img 
+                alt={profileName} 
+                className="w-10 h-10 rounded-full object-cover border border-slate-200" 
+                src={profileAvatar} 
+              />
+              <div className="hidden lg:block text-left">
+                <p className="text-sm font-bold text-slate-800 leading-none">{profileName}</p>
+                <p className="text-xs text-slate-400 mt-1">{profileRole}</p>
+              </div>
+            </button>
+
+            {/* Profile Dropdown */}
+            {profileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg p-2 z-50 border border-slate-100">
+                <div className="px-3 py-2 border-b border-slate-100 mb-1">
+                  <p className="text-xs font-bold text-slate-800">{profileName}</p>
+                  <p className="text-[10px] text-slate-400 truncate">{user?.email || 'erika.collins@risklens.ai'}</p>
+                </div>
+
                 <button
-                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="flex items-center gap-2 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => {
+                    navigate('/settings');
+                    setProfileMenuOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2"
                 >
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <span className="text-sm font-medium hidden lg:inline">{user?.first_name}</span>
+                  <Settings className="w-3.5 h-3.5" />
+                  Settings
                 </button>
 
-                {/* Profile Dropdown */}
-                {profileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">{user?.first_name} {user?.last_name}</p>
-                      <p className="text-xs text-gray-600">{user?.email}</p>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        navigate('/settings');
-                        setProfileMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                    >
-                      <Settings className="w-4 h-4" />
-                      Settings
-                    </button>
-
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </div>
-                )}
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Logout
+                </button>
               </div>
-            </div>
+            )}
           </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white">
-          <div className="px-4 py-4 space-y-4">
-            <button
-              onClick={() => {
-                navigate('/settings');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2"
-            >
-              <Settings className="w-4 h-4" />
-              Settings
-            </button>
-            <button
-              onClick={handleLogout}
-              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

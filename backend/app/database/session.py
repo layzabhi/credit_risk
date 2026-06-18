@@ -17,13 +17,20 @@ from app.models.database import Base
 logger = logging.getLogger(__name__)
 
 # Create engine
+engine_kwargs = {
+    "echo": settings.SQLALCHEMY_ECHO,
+}
+if "sqlite" in settings.DATABASE_URL:
+    engine_kwargs["poolclass"] = pool.NullPool
+else:
+    engine_kwargs["poolclass"] = pool.QueuePool
+    engine_kwargs["pool_size"] = 10
+    engine_kwargs["max_overflow"] = 20
+    engine_kwargs["pool_recycle"] = 3600  # Recycle connections every hour
+
 engine = create_engine(
     settings.DATABASE_URL,
-    echo=settings.SQLALCHEMY_ECHO,
-    poolclass=pool.NullPool if "sqlite" in settings.DATABASE_URL else pool.QueuePool,
-    pool_size=10,
-    max_overflow=20,
-    pool_recycle=3600,  # Recycle connections every hour
+    **engine_kwargs
 )
 
 # Create session factory

@@ -114,68 +114,6 @@ class ScoringResponse(BaseModel):
     audit_trail: AuditTrail = Field(..., description="Audit trail")
 
 
-class BatchJobResponse(BaseModel):
-    """Batch job status response."""
-    
-    job_id: str = Field(..., description="Unique batch job ID")
-    job_name: str = Field(..., description="Descriptive job name")
-    status: str = Field(..., description="Job status (pending/processing/completed/failed)")
-    total_records: int = Field(..., description="Total records in batch")
-    processed_records: int = Field(..., description="Records processed so far")
-    
-    created_at: datetime = Field(..., description="When job was created")
-    started_at: Optional[datetime] = Field(None, description="When processing started")
-    completed_at: Optional[datetime] = Field(None, description="When job completed")
-    
-    summary_metrics: Optional[Dict[str, Any]] = Field(None, description="Portfolio metrics")
-
-
-class BatchResultResponse(BaseModel):
-    """Individual result from batch processing."""
-    
-    batch_result_id: str = Field(..., description="Unique result ID")
-    job_id: str = Field(..., description="Parent batch job ID")
-    applicant_id: str = Field(..., description="Applicant ID")
-    risk_rating: str = Field(..., description="Risk rating")
-    default_probability: float = Field(..., description="Default probability")
-    confidence_score: float = Field(..., description="Confidence score")
-    created_at: datetime = Field(..., description="When scored")
-
-
-class ModelRegistryEntry(BaseModel):
-    """Model registry entry."""
-    
-    model_id: str = Field(..., description="Unique model ID")
-    model_name: str = Field(..., description="Model name")
-    version: str = Field(..., description="Version string (e.g., 2.0.0)")
-    model_type: str = Field(..., description="Model type (xgboost, lightgbm, etc.)")
-    
-    training_date: datetime = Field(..., description="When model was trained")
-    deployment_date: Optional[datetime] = Field(None, description="When deployed")
-    status: str = Field(..., description="active/inactive/deprecated")
-    
-    metrics: Dict[str, float] = Field(..., description="Performance metrics")
-    training_samples: int = Field(..., description="Number of training samples")
-    
-    promoted_at: Optional[datetime] = Field(None, description="When promoted to production")
-    promoted_by: Optional[str] = Field(None, description="User who promoted")
-
-
-class AuditLogEntry(BaseModel):
-    """Audit log entry."""
-    
-    log_id: str = Field(..., description="Unique log ID")
-    timestamp: datetime = Field(..., description="When event occurred")
-    event_type: str = Field(..., description="Event type (score/batch/governance/etc)")
-    
-    user_id: Optional[str] = Field(None, description="User who triggered event")
-    applicant_id: Optional[str] = Field(None, description="Related applicant")
-    job_id: Optional[str] = Field(None, description="Related batch job")
-    
-    action: str = Field(..., description="Action performed")
-    status: str = Field(..., description="success/failure")
-    details: Dict[str, Any] = Field(..., description="Event details")
-
 
 class HealthCheckResponse(BaseModel):
     """Health check response."""

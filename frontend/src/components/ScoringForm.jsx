@@ -1,18 +1,6 @@
-/**
- * ScoringForm Component
- * 
- * Single applicant credit risk assessment form.
- * Features:
- * - Form validation with real-time feedback
- * - Submit to API endpoint
- * - Display risk rating with color coding
- * - Show SHAP explanations
- * - Loading state management
- */
-
 import React, { useState } from 'react';
 import axios from 'axios';
-import { AlertCircle, Loader, CheckCircle, TrendingUp } from 'lucide-react';
+import { AlertCircle, Loader2, Play } from 'lucide-react';
 
 const ScoringForm = ({ onScoreComplete }) => {
   const [formData, setFormData] = useState({
@@ -36,23 +24,23 @@ const ScoringForm = ({ onScoreComplete }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [scoreResult, setScoreResult] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
 
   // Form field definitions with validation rules
   const fields = [
+    { name: 'applicant_id', label: 'Applicant ID', type: 'text', required: true, span: 2 },
     { name: 'age', label: 'Age', type: 'number', min: 18, max: 100, required: true },
     { name: 'gender', label: 'Gender', type: 'select', options: ['Male', 'Female', 'Non-binary'], required: true },
     { name: 'education_level', label: 'Education Level', type: 'select', options: ['High School', 'Bachelor', 'Master', 'PhD'], required: true },
     { name: 'marital_status', label: 'Marital Status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed'], required: true },
     { name: 'income', label: 'Annual Income ($)', type: 'number', min: 0, required: true },
-    { name: 'credit_score', label: 'Credit Score', type: 'number', min: 300, max: 850, required: true },
-    { name: 'loan_amount', label: 'Loan Amount ($)', type: 'number', min: 0, required: true },
+    { name: 'credit_score', label: 'FICO Credit Score (300-850)', type: 'number', min: 300, max: 850, required: true },
+    { name: 'loan_amount', label: 'Requested Loan Amount ($)', type: 'number', min: 0, required: true },
     { name: 'loan_purpose', label: 'Loan Purpose', type: 'select', options: ['Personal', 'Auto', 'Home', 'Education', 'Business'], required: true },
     { name: 'employment_status', label: 'Employment Status', type: 'select', options: ['Employed', 'Self-employed', 'Unemployed'], required: true },
-    { name: 'years_at_current_job', label: 'Years at Current Job', type: 'number', min: 0, max: 60, required: true },
+    { name: 'years_at_current_job', label: 'Years of Employment', type: 'number', min: 0, max: 60, required: true },
     { name: 'payment_history', label: 'Payment History', type: 'select', options: ['Good', 'Fair', 'Poor'], required: true },
-    { name: 'debt_to_income_ratio', label: 'Debt-to-Income Ratio', type: 'number', min: 0, max: 1, step: 0.01, required: true },
+    { name: 'debt_to_income_ratio', label: 'Debt-to-Income (DTI) Ratio', type: 'number', min: 0, max: 1, step: 0.01, required: true },
     { name: 'assets_value', label: 'Total Assets ($)', type: 'number', min: 0, required: true },
     { name: 'number_of_dependents', label: 'Number of Dependents', type: 'number', min: 0, max: 10, required: true },
     { name: 'previous_defaults', label: 'Previous Defaults', type: 'number', min: 0, required: true },
@@ -62,8 +50,8 @@ const ScoringForm = ({ onScoreComplete }) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'years_at_current_job' || name === 'number_of_dependents' || name === 'previous_defaults'
-        ? parseInt(value) || ''
+      [name]: name === 'years_at_current_job' || name === 'number_of_dependents' || name === 'previous_defaults' || name === 'age' || name === 'income' || name === 'credit_score' || name === 'loan_amount' || name === 'debt_to_income_ratio' || name === 'assets_value'
+        ? value === '' ? '' : Number(value)
         : value,
     }));
     
@@ -114,18 +102,15 @@ const ScoringForm = ({ onScoreComplete }) => {
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
-      setError('Please correct the errors above');
+      setError('Please correct the validation errors below');
       return;
     }
     
     setLoading(true);
     setError(null);
-    setScoreResult(null);
     
     try {
       const response = await axios.post('/api/v1/score', formData);
-      setScoreResult(response.data);
-      
       if (onScoreComplete) {
         onScoreComplete(response.data);
       }
@@ -138,47 +123,27 @@ const ScoringForm = ({ onScoreComplete }) => {
     }
   };
 
-  const getRiskColor = (rating) => {
-    const colors = {
-      'low': 'bg-green-50 border-green-200',
-      'medium': 'bg-yellow-50 border-yellow-200',
-      'high': 'bg-red-50 border-red-200',
-    };
-    return colors[rating?.toLowerCase()] || 'bg-gray-50 border-gray-200';
-  };
-
-  const getRiskTextColor = (rating) => {
-    const colors = {
-      'low': 'text-green-700',
-      'medium': 'text-yellow-700',
-      'high': 'text-red-700',
-    };
-    return colors[rating?.toLowerCase()] || 'text-gray-700';
-  };
-
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-2">Credit Risk Assessment</h1>
-      <p className="text-gray-600 mb-8">Enter applicant information for instant risk scoring</p>
-
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-            <div>
-              <p className="font-semibold text-red-800">Error</p>
-              <p className="text-red-700 text-sm">{error}</p>
-            </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-red-800">
+          <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
+          <div>
+            <p className="font-bold text-xs">Error</p>
+            <p className="text-[11px]">{error}</p>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Form Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {fields.map(field => (
-            <div key={field.name}>
-              <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-2">
+      {/* Form Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+        {fields.map(field => {
+          const isDisabled = false;
+          return (
+            <div key={field.name} className={`${field.span === 2 ? 'md:col-span-2' : ''} space-y-1`}>
+              <label htmlFor={field.name} className="block text-xs font-semibold text-slate-500">
                 {field.label}
-                {field.required && <span className="text-red-500">*</span>}
+                {field.required && <span className="text-red-500 ml-0.5">*</span>}
               </label>
 
               {field.type === 'select' ? (
@@ -187,9 +152,7 @@ const ScoringForm = ({ onScoreComplete }) => {
                   name={field.name}
                   value={formData[field.name]}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    validationErrors[field.name] ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className="w-full bg-white border border-outline-variant rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface"
                 >
                   {field.options.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>
@@ -205,94 +168,46 @@ const ScoringForm = ({ onScoreComplete }) => {
                   min={field.min}
                   max={field.max}
                   step={field.step || 1}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    validationErrors[field.name] ? 'border-red-500' : 'border-gray-300'
+                  disabled={isDisabled}
+                  className={`w-full border border-outline-variant rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface font-mono ${
+                    isDisabled 
+                      ? 'bg-slate-50 text-slate-400 cursor-not-allowed border-dashed' 
+                      : 'bg-white'
                   }`}
                   placeholder={`Enter ${field.label.toLowerCase()}`}
+                  required={field.required}
                 />
               )}
 
               {validationErrors[field.name] && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors[field.name]}</p>
+                <p className="text-red-500 text-[10px] font-semibold pl-1 mt-0.5">{validationErrors[field.name]}</p>
               )}
             </div>
-          ))}
-        </div>
+          );
+        })}
+      </div>
 
-        {/* Submit Button */}
+      {/* Submit Button */}
+      <div className="pt-4">
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2"
+          className="w-full h-12 bg-primary hover:bg-primary/95 text-white font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg active:scale-[0.98] disabled:opacity-50 text-xs uppercase tracking-wider cursor-pointer"
         >
           {loading ? (
             <>
-              <Loader size={20} className="animate-spin" />
-              Scoring...
+              <Loader2 size={16} className="animate-spin text-white" />
+              Computing Risk Profile...
             </>
           ) : (
             <>
-              <TrendingUp size={20} />
-              Score Applicant
+              <Play size={14} className="fill-current text-white" />
+              Run Risk Analysis
             </>
           )}
         </button>
-      </form>
-
-      {/* Result Display */}
-      {scoreResult && (
-        <div className={`mt-8 p-8 rounded-lg border-2 ${getRiskColor(scoreResult.risk_rating)}`}>
-          <div className="flex items-center gap-3 mb-6">
-            <CheckCircle className={`${getRiskTextColor(scoreResult.risk_rating)}`} size={28} />
-            <h2 className={`text-2xl font-bold ${getRiskTextColor(scoreResult.risk_rating)}`}>
-              {scoreResult.risk_rating?.toUpperCase()} RISK
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div>
-              <p className="text-sm text-gray-600">Default Probability</p>
-              <p className="text-2xl font-bold text-gray-900">{(scoreResult.default_probability * 100).toFixed(2)}%</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Confidence Score</p>
-              <p className="text-2xl font-bold text-gray-900">{(scoreResult.confidence_score * 100).toFixed(1)}%</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Model Version</p>
-              <p className="text-2xl font-bold text-gray-900">{scoreResult.model_version}</p>
-            </div>
-          </div>
-
-          {/* Top Features */}
-          {scoreResult.explanations?.top_features?.length > 0 && (
-            <div className="mt-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Key Influencing Factors</h3>
-              <div className="space-y-3">
-                {scoreResult.explanations.top_features.slice(0, 5).map((feature, idx) => (
-                  <div key={idx} className="flex items-center justify-between">
-                    <span className="text-gray-700 capitalize">{feature.name.replace(/_/g, ' ')}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${feature.direction === 'positive' ? 'bg-red-500' : 'bg-green-500'}`}
-                          style={{ width: `${Math.min(feature.impact * 100, 100)}%` }}
-                        />
-                      </div>
-                      <span className="text-sm font-semibold text-gray-700">{(feature.impact * 100).toFixed(1)}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <p className="text-xs text-gray-500 mt-6">
-            Scored at {new Date(scoreResult.scoring_timestamp).toLocaleString()} · Processing time: {scoreResult.processing_time_ms.toFixed(2)}ms
-          </p>
-        </div>
-      )}
-    </div>
+      </div>
+    </form>
   );
 };
 

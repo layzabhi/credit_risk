@@ -15,6 +15,74 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
+import sys
+import pandas as pd
+import numpy as np
+from app.utils.feature_engineering import add_engineered_features
+
+class LegacyDataPreprocessor:
+    """Replica of the training preprocessor to allow deserialization and transformation."""
+    version = "1.0"
+
+    def __init__(self, config=None):
+        self.config = config
+        self.scaler = None
+        self.encoders = {}
+        self.ohe = None
+        self.ohe_cols = None
+
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        X = self._handle_missing_values(X)
+        X = self._encode_categorical(X, fit=False)
+        X = add_engineered_features(X)
+        X = self._scale_features(X, fit=False)
+        return X
+
+    def _handle_missing_values(self, X: pd.DataFrame) -> pd.DataFrame:
+        strategy = self.config['data']['missing_values']['strategy']
+        if strategy == 'drop':
+            X = X.dropna()
+        elif strategy == 'impute':
+            method = self.config['data']['missing_values']['impute_method']
+            X = X.fillna(X.mean(numeric_only=True) if method == 'mean' else X.median(numeric_only=True))
+        return X
+
+    def _handle_outliers(self, X: pd.DataFrame) -> pd.DataFrame:
+        return X
+
+    def _encode_categorical(self, X: pd.DataFrame, fit: bool = False) -> pd.DataFrame:
+        X = X.copy()
+        history_map = {"Poor": 0, "Fair": 1, "Good": 2}
+        edu_map = {"High School": 0, "Bachelor": 1, "Master": 2, "PhD": 3}
+        if "payment_history" in X.columns:
+            X["payment_history"] = X["payment_history"].map(history_map).fillna(2)
+        if "education_level" in X.columns:
+            X["education_level"] = X["education_level"].map(edu_map).fillna(0)
+        if "gender" in X.columns:
+            X["gender"] = X["gender"].map({"Male": 1, "Female": 0}).fillna(0)
+        if "employment_status" in X.columns:
+            X["employment_status"] = X["employment_status"].map({"Employed": 1, "Unemployed": 0}).fillna(1)
+        nominal_cols = [col for col in ["marital_status", "loan_purpose"] if col in X.columns]
+        if self.ohe is not None and nominal_cols:
+            ohe_data = self.ohe.transform(X[nominal_cols])
+            ohe_df = pd.DataFrame(ohe_data, columns=self.ohe_cols, index=X.index)
+            X = pd.concat([X.drop(columns=nominal_cols), ohe_df], axis=1)
+        bool_cols = X.select_dtypes(include=['bool']).columns
+        X[bool_cols] = X[bool_cols].astype(int)
+        return X
+
+    def _scale_features(self, X: pd.DataFrame, fit: bool = False) -> pd.DataFrame:
+        if self.scaler:
+            if hasattr(self.scaler, "feature_names_in_"):
+                X = X[list(self.scaler.feature_names_in_)]
+            X = pd.DataFrame(
+                self.scaler.transform(X),
+                columns=X.columns,
+                index=X.index,
+            )
+        return X
+
+
 class ModelLoader:
     """
     Load and cache ML models for inference.
@@ -56,6 +124,11 @@ class ModelLoader:
             - feature_names.json (optional)
             - calibration_data.pkl (optional)
         """
+        # Inject DataPreprocessor into __main__ module to support unpickling
+        import __main__
+        __main__.DataPreprocessor = LegacyDataPreprocessor
+        sys.modules['__main__'].DataPreprocessor = LegacyDataPreprocessor
+
         if not self.model_dir.exists():
             logger.warning(f"Model directory '{self.model_dir}' does not exist.")
             return

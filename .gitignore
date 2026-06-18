@@ -79,3 +79,9 @@ logs/
 *.tmp
 tmp/
 temp/
+
+# Captured test output files (from docker exec ... pytest ... > *.txt)
+test_out.txt
+test_out_gov.txt
+promote_out.txt
+*_out.txt

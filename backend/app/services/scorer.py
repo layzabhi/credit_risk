@@ -142,7 +142,7 @@ class ScoringService:
                 processing_time_ms=(datetime.utcnow() - scoring_start).total_seconds() * 1000,
                 explanations=explanation_data,
                 audit_trail={
-                    "preprocessor_version": self.preprocessor.version,
+                    "preprocessor_version": getattr(self.preprocessor, "version", "1.0"),
                     "validation_passed": True,
                     "threshold_tuning_applied": apply_threshold_tuning and self.threshold_tuner is not None,
                     "input_hash": self._hash_input(request),
@@ -209,16 +209,16 @@ class ScoringService:
         return pd.DataFrame([
             {
                 "age": request.age,
-                "gender": request.gender,
-                "education_level": request.education_level,
-                "marital_status": request.marital_status,
+                "gender": request.gender.value if hasattr(request.gender, "value") else request.gender,
+                "education_level": request.education_level.value if hasattr(request.education_level, "value") else request.education_level,
+                "marital_status": request.marital_status.value if hasattr(request.marital_status, "value") else request.marital_status,
                 "income": request.income,
                 "credit_score": request.credit_score,
                 "loan_amount": request.loan_amount,
-                "loan_purpose": request.loan_purpose,
-                "employment_status": request.employment_status,
+                "loan_purpose": request.loan_purpose.value if hasattr(request.loan_purpose, "value") else request.loan_purpose,
+                "employment_status": request.employment_status.value if hasattr(request.employment_status, "value") else request.employment_status,
                 "years_at_current_job": request.years_at_current_job,
-                "payment_history": request.payment_history,
+                "payment_history": request.payment_history.value if hasattr(request.payment_history, "value") else request.payment_history,
                 "debt_to_income_ratio": request.debt_to_income_ratio,
                 "assets_value": request.assets_value,
                 "number_of_dependents": request.number_of_dependents,
@@ -247,7 +247,12 @@ class ScoringService:
                 return proba[0, 1] if proba.shape[1] > 1 else proba[0, 0]
             elif hasattr(self.model, "predict"):
                 # For other model types
-                pred = self.model.predict(X)
+                if type(self.model).__name__ == "Booster":
+                    import xgboost as xgb
+                    dmatrix = xgb.DMatrix(X)
+                    pred = self.model.predict(dmatrix)
+                else:
+                    pred = self.model.predict(X)
                 # Normalize if needed
                 return float(pred[0])
             else:
