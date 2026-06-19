@@ -53,7 +53,8 @@ export function LandingPage() {
   return (
     <div className="landing-page-root" ref={containerRef}>
       {/* Scoped CSS variables to match Stitch design and prevent polluting internal dashboard UI */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .landing-page-root {
           --primary: #3525cd;
           --primary-container: #4f46e5;
@@ -155,7 +156,7 @@ export function LandingPage() {
             <a className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#solutions">
               Solutions
             </a>
-            <button 
+            <button
               onClick={handleAction}
               className="bg-primary-container text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:bg-primary transition-all shadow-sm cursor-pointer"
             >
@@ -180,27 +181,27 @@ export function LandingPage() {
                 Leverage machine learning and alternative data to predict creditworthiness with surgical accuracy. RiskLens delivers actionable insights in milliseconds.
               </p>
               <div className="flex flex-wrap gap-4">
-                <button 
+                <button
                   onClick={handleRegisterAction}
                   className="bg-primary-container text-on-primary px-8 py-4 rounded-lg font-h4 text-h4 hover:scale-[1.02] transition-transform shadow-lg cursor-pointer font-semibold"
                 >
-                  Start Free Trial
+                  Get Started
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     const el = document.getElementById('features');
                     el?.scrollIntoView({ behavior: 'smooth' });
                   }}
                   className="border border-outline text-on-surface px-8 py-4 rounded-lg font-h4 text-h4 hover:bg-surface-container transition-colors cursor-pointer font-semibold"
                 >
-                  Book Demo
+                  Learn more
                 </button>
               </div>
             </div>
 
             <div className="relative min-h-[400px] lg:min-h-[500px]">
               <div className="absolute inset-0 bg-primary-fixed/20 rounded-3xl blur-3xl"></div>
-              
+
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
                 <div className="landing-glass-card p-8 rounded-2xl shadow-2xl relative">
                   <div className="flex justify-between items-center mb-6">
@@ -282,9 +283,9 @@ export function LandingPage() {
               {/* Feature 3 */}
               <div className="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 hover:border-primary transition-all group">
                 <div className="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center mb-8 group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
-                  <img 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtHWtj7EzqMpXLmfddldg5ecKeSgyFT-8VdmupeuEFgjfl3a-EU_5a7zXF-nkMtV-RcWhOYPacUTAVRZ3dwXfah8MgvRQAHjPj4jX2YwswyZvveAVMGxIByQklM686w4fJGuVqprrEU-plxiNdwxdlVnHl-iaIrYH9N-9Z4_RXimYF1Or0VupSfl8AZDpc-1sb51CM36jmtj5TElTuEcM-XBzkt1Kn8yO1325FgT90XoDrWcyiGXUe-KUCtVCST9K-Q-5D9ELXHpo" 
-                    alt="Model Performance Logo" 
+                  <img
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtHWtj7EzqMpXLmfddldg5ecKeSgyFT-8VdmupeuEFgjfl3a-EU_5a7zXF-nkMtV-RcWhOYPacUTAVRZ3dwXfah8MgvRQAHjPj4jX2YwswyZvveAVMGxIByQklM686w4fJGuVqprrEU-plxiNdwxdlVnHl-iaIrYH9N-9Z4_RXimYF1Or0VupSfl8AZDpc-1sb51CM36jmtj5TElTuEcM-XBzkt1Kn8yO1325FgT90XoDrWcyiGXUe-KUCtVCST9K-Q-5D9ELXHpo"
+                    alt="Model Performance Logo"
                     className="w-8 h-auto object-contain grayscale group-hover:grayscale-0 transition-all"
                   />
                 </div>
@@ -310,8 +311,8 @@ export function LandingPage() {
                   <div className="flex items-start gap-4">
                     <span className="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span>
                     <div>
-                      <p className="font-label-md text-label-md font-bold">Dynamic Adjustments</p>
-                      <p className="font-body-sm text-body-sm opacity-70 mt-1">Update scoring models without downtime or complex redeployments.</p>
+                      <p className="font-label-md text-label-md font-bold">ML Risk Engine</p>
+                      <p className="font-body-sm text-body-sm opacity-70 mt-1">XGBoost model optimized for credit assessment using 24+ core applicant features.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -408,37 +409,37 @@ export function LandingPage() {
         <section className="py-16 px-4 max-w-7xl mx-auto overflow-hidden" id="solutions">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="relative order-2 lg:order-1">
-              <img 
-                alt="Integration Dashboard" 
-                className="rounded-2xl shadow-2xl border border-outline-variant/30 w-full object-cover" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA51e7Yh8g7X1WVNu_4UmZECcqgdSCegR4z7iVm9PAuM67uUvU_Hm5qK3Kdptk1KYpuPJZe7Mia3GoKvszXxBTtoBFVymtwAXD-9uPOtHJMODisTpgmw5HE4-cghH0_cP_lBRCmerLw-TRUeSehdKsUNsAgUo2vn2PnjSaD5uBXoAjc6vCbIhcUpCe1dduMUotnQ-HDluV9FyFc2aHrbSOvzOXslv6iXYB7FaKXsF_E3p3ZGkRxRCKM43HsQ7z0hCaTc2J0Dyb6LPA" 
+              <img
+                alt="Integration Dashboard"
+                className="rounded-2xl shadow-2xl border border-outline-variant/30 w-full object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA51e7Yh8g7X1WVNu_4UmZECcqgdSCegR4z7iVm9PAuM67uUvU_Hm5qK3Kdptk1KYpuPJZe7Mia3GoKvszXxBTtoBFVymtwAXD-9uPOtHJMODisTpgmw5HE4-cghH0_cP_lBRCmerLw-TRUeSehdKsUNsAgUo2vn2PnjSaD5uBXoAjc6vCbIhcUpCe1dduMUotnQ-HDluV9FyFc2aHrbSOvzOXslv6iXYB7FaKXsF_E3p3ZGkRxRCKM43HsQ7z0hCaTc2J0Dyb6LPA"
               />
               <div className="absolute -bottom-6 -right-6 bg-surface-container-lowest p-6 rounded-2xl shadow-xl border border-outline-variant/50 hidden md:block">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
-                    <span className="material-symbols-outlined">api</span>
+                    <span className="material-symbols-outlined">bolt</span>
                   </div>
                   <div>
-                    <p className="font-label-md text-label-md font-bold text-on-surface">API Status: Online</p>
-                    <p className="font-body-sm text-body-sm text-on-surface-variant">Response time: 42ms</p>
+                    <p className="font-label-md text-label-md font-bold text-on-surface">Model Latency</p>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant">Response time: &lt; 100ms</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="order-1 lg:order-2">
-              <h2 className="font-h2 text-h2 mb-6 text-on-surface leading-tight">Seamless Stack Integration</h2>
+              <h2 className="font-h2 text-h2 mb-6 text-on-surface leading-tight">End-to-End Decision Pipeline</h2>
               <p className="font-body-md text-body-md text-on-surface-variant mb-8">
-                RiskLens is built for developers. Our API-first architecture ensures that you can plug into your existing LOS (Loan Origination System) or mobile app in hours, not weeks.
+                RiskLens integrates predictive machine learning and explainability into a unified pipeline. Instantly evaluate individual applicants and inspect critical risk indicators.
               </p>
               <ul className="space-y-4">
                 <li className="flex items-center gap-4 text-on-surface font-label-md">
-                  <span className="material-symbols-outlined text-primary">terminal</span> SDKs for Python, Node.js, and Go
+                  <span className="material-symbols-outlined text-primary">fact_check</span> Interactive Risk Assessment &amp; Scoring
                 </li>
                 <li className="flex items-center gap-4 text-on-surface font-label-md">
-                  <span className="material-symbols-outlined text-primary">lock</span> SOC2 Type II Compliant Infrastructure
+                  <span className="material-symbols-outlined text-primary">insights</span> Detailed SHAP Feature Explanations
                 </li>
                 <li className="flex items-center gap-4 text-on-surface font-label-md">
-                  <span className="material-symbols-outlined text-primary">webhook</span> Real-time Webhook Notifications
+                  <span className="material-symbols-outlined text-primary">history</span> Application Tracking &amp; Historic Logs
                 </li>
               </ul>
             </div>
@@ -456,7 +457,7 @@ export function LandingPage() {
                 Join RiskLens to drive more accurate lending decisions and lower default rates.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <button 
+                <button
                   onClick={handleRegisterAction}
                   className="bg-white text-primary px-8 py-4 rounded-xl font-h4 text-h4 shadow-xl hover:bg-surface-container-highest transition-colors font-semibold cursor-pointer"
                 >
