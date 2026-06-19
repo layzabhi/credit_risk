@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useApi } from '../hooks/useApi';
 import {
   BarChart3,
   TrendingDown,
@@ -11,18 +12,58 @@ import {
   ScatterChart,
   Sparkles,
   Cpu,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 
 export function ExplainabilityPage() {
-  const [searchTerm, setSearchTerm] = useState('ID-8842-XJ');
+  const [searchTerm, setSearchTerm] = useState('APP-SEED-1000');
+  const [explanation, setExplanation] = useState(null);
+  const [assessment, setAssessment] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showShiftDetails, setShowShiftDetails] = useState(false);
   const [isRetraining, setIsRetraining] = useState(false);
   const [retrained, setRetrained] = useState(false);
 
+  const { get } = useApi();
+
+  const fetchExplanationData = async (targetId) => {
+    if (!targetId || !targetId.trim()) return;
+    setLoading(true);
+    setSearchError(null);
+    try {
+      // 1. Fetch scoring history for this applicant
+      const history = await get(`/score/history/${targetId.trim()}`);
+      if (!history || history.length === 0) {
+        throw new Error(`No assessment history found for ID: ${targetId}`);
+      }
+      
+      // 2. Fetch explanation details
+      const explData = await get(`/v1/explain/${targetId.trim()}`);
+      
+      setAssessment(history[0]);
+      setExplanation(explData);
+    } catch (err) {
+      console.error(err);
+      setSearchError(err.message || 'Failed to retrieve model interpretability details.');
+      setAssessment(null);
+      setExplanation(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchExplanationData('APP-SEED-1000');
+  }, []);
+
   const handleRecalculate = () => {
     setIsCalculating(true);
+    if (assessment) {
+      fetchExplanationData(assessment.applicant_id);
+    }
     setTimeout(() => {
       setIsCalculating(false);
     }, 1000);
@@ -168,7 +209,13 @@ export function ExplainabilityPage() {
       </div>
 
       {/* Local Explanation Section */}
-      <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white">
+      <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white relative">
+        {loading && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] rounded-2xl flex items-center justify-center z-10 animate-fadeIn">
+            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          </div>
+        )}
+        
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h4 className="font-semibold text-xl flex items-center gap-2 text-on-surface">
@@ -179,73 +226,122 @@ export function ExplainabilityPage() {
               Specific force-plot breakdown for a given application ID.
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="px-4 py-2 rounded-full flex items-center gap-2 w-64 bg-slate-50 border border-slate-200">
-              <Search className="w-4 h-4 text-outline" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-transparent border-none focus:ring-0 text-xs w-full p-0 font-medium placeholder:text-outline text-on-surface"
-                placeholder="Search Application ID..."
-              />
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-col">
+              <div className="px-4 py-2 rounded-full flex items-center gap-2 w-64 bg-slate-50 border border-slate-200">
+                <Search className="w-4 h-4 text-outline" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      fetchExplanationData(searchTerm);
+                    }
+                  }}
+                  className="bg-transparent border-none focus:ring-0 text-xs w-full p-0 font-medium placeholder:text-outline text-on-surface"
+                  placeholder="Search Application ID..."
+                />
+                <button 
+                  onClick={() => fetchExplanationData(searchTerm)}
+                  className="text-xs font-bold text-primary hover:underline"
+                >
+                  Search
+                </button>
+              </div>
+              {searchError && (
+                <span className="text-[10px] text-red-500 font-semibold mt-1 px-2">
+                  {searchError}. Try: APP-SEED-1000
+                </span>
+              )}
             </div>
-            <div className="h-8 w-[1px] bg-outline-variant"></div>
+            <div className="h-8 w-[1px] bg-outline-variant hidden sm:block"></div>
             <div className="text-right">
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Base Risk</p>
-              <p className="text-lg font-bold text-on-surface font-mono">0.42</p>
+              <p className="text-lg font-bold text-on-surface font-mono">
+                {explanation ? explanation.base_value.toFixed(2) : '0.15'}
+              </p>
             </div>
-            <div className="w-[1px] h-8 bg-outline-variant"></div>
+            <div className="w-[1px] h-8 bg-outline-variant hidden sm:block"></div>
             <div className="text-right">
               <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Final Risk</p>
-              <p className="text-lg font-bold text-primary font-mono">0.78</p>
+              <p className="text-lg font-bold text-primary font-mono">
+                {assessment ? assessment.risk_score.toFixed(2) : '0.78'}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Force Plot Visualization Placeholder */}
-        <div className="relative h-56 w-full rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center overflow-hidden p-6">
-          <div className="absolute inset-0 flex items-center px-12">
-            {/* Negative Forces (Risk Drivers - Red) */}
-            <div className="flex-1 flex flex-col items-end gap-2 pr-6">
-              <div className="h-8 w-[80%] bg-red-500/20 border-r-4 border-red-500 rounded-l-lg flex items-center justify-end pr-3">
-                <span className="text-[10px] font-bold text-red-800 uppercase font-mono">Utilization = 82% (-15.4%)</span>
+        {/* Force Plot Visualization */}
+        {explanation || assessment ? (
+          <div className="relative h-56 w-full rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center overflow-hidden p-6">
+            <div className="absolute inset-0 flex items-center px-12">
+              {/* Negative Forces (Risk Drivers - Red) */}
+              <div className="flex-1 flex flex-col items-end gap-2 pr-6">
+                {(explanation?.top_features?.filter(f => f.direction === 'positive') || []).slice(0, 3).map((feat, idx) => {
+                  const widthPercent = Math.min(Math.max(feat.impact * 150, 45), 95);
+                  return (
+                    <div 
+                      key={idx} 
+                      style={{ width: `${widthPercent}%` }}
+                      className="h-8 bg-red-500/10 border-r-4 border-red-500 rounded-l-lg flex items-center justify-end pr-3 transition-all"
+                    >
+                      <span className="text-[10px] font-bold text-red-800 uppercase font-mono truncate max-w-full px-1">
+                        {feat.name.replace(/_/g, ' ')} (+{(feat.impact * 100).toFixed(1)}%)
+                      </span>
+                    </div>
+                  );
+                })}
+                {(explanation?.top_features?.filter(f => f.direction === 'positive') || []).length === 0 && (
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">No major risk drivers</span>
+                )}
               </div>
-              <div className="h-8 w-[60%] bg-red-500/20 border-r-4 border-red-500 rounded-l-lg flex items-center justify-end pr-3">
-                <span className="text-[10px] font-bold text-red-800 uppercase font-mono">3 Inquiries Last 6mo (-9.8%)</span>
+
+              {/* Center Point Circle */}
+              <div className="z-10 w-16 h-16 rounded-full bg-white shadow-md flex flex-col items-center justify-center border-2 border-primary shrink-0">
+                <span className="text-xs font-bold text-on-surface-variant uppercase text-[8px]">Output</span>
+                <span className="text-sm font-extrabold text-primary font-mono leading-none">
+                  {assessment ? assessment.risk_score.toFixed(2) : '0.78'}
+                </span>
               </div>
-              <div className="h-8 w-[40%] bg-red-500/20 border-r-4 border-red-500 rounded-l-lg flex items-center justify-end pr-3">
-                <span className="text-[10px] font-bold text-red-800 uppercase font-mono">Debt-to-Inc = 42% (-6.2%)</span>
+
+              {/* Positive Forces (Mitigators - Green) */}
+              <div className="flex-1 flex flex-col items-start gap-2 pl-6">
+                {(explanation?.top_features?.filter(f => f.direction === 'negative') || []).slice(0, 3).map((feat, idx) => {
+                  const widthPercent = Math.min(Math.max(feat.impact * 150, 45), 95);
+                  return (
+                    <div 
+                      key={idx} 
+                      style={{ width: `${widthPercent}%` }}
+                      className="h-8 bg-green-500/15 border-l-4 border-green-500 rounded-r-lg flex items-center justify-start pl-3 transition-all"
+                    >
+                      <span className="text-[10px] font-bold text-green-700 uppercase font-mono truncate max-w-full px-1">
+                        {feat.name.replace(/_/g, ' ')} (-{(feat.impact * 100).toFixed(1)}%)
+                      </span>
+                    </div>
+                  );
+                })}
+                {(explanation?.top_features?.filter(f => f.direction === 'negative') || []).length === 0 && (
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">No major risk mitigators</span>
+                )}
               </div>
             </div>
 
-            {/* Center Point Circle */}
-            <div className="z-10 w-16 h-16 rounded-full bg-white shadow-md flex flex-col items-center justify-center border-2 border-primary shrink-0">
-              <span className="text-xs font-bold text-on-surface-variant uppercase text-[8px]">Output</span>
-              <span className="text-sm font-extrabold text-primary font-mono leading-none">0.78</span>
-            </div>
-
-            {/* Positive Forces (Mitigators - Green) */}
-            <div className="flex-1 flex flex-col items-start gap-2 pl-6">
-              <div className="h-8 w-[70%] bg-green-500/25 border-l-4 border-green-500 rounded-r-lg flex items-center justify-start pl-3">
-                <span className="text-[10px] font-bold text-green-700 uppercase font-mono">Age = 42 (+12.0%)</span>
+            {/* Legend */}
+            <div className="absolute bottom-4 flex gap-6 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-500 rounded-sm"></div> Higher Risk
               </div>
-              <div className="h-8 w-[50%] bg-green-500/25 border-l-4 border-green-500 rounded-r-lg flex items-center justify-start pl-3">
-                <span className="text-[10px] font-bold text-green-700 uppercase font-mono">Employment &gt; 5 yrs (+8.5%)</span>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-sm"></div> Lower Risk
               </div>
             </div>
           </div>
-
-          {/* Legend */}
-          <div className="absolute bottom-4 flex gap-6 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-sm"></div> Higher Risk
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-sm"></div> Lower Risk
-            </div>
+        ) : (
+          <div className="h-56 w-full rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center p-6 text-slate-400 text-sm font-semibold">
+            No applicant search data available. Try entering APP-SEED-1000 above.
           </div>
-        </div>
+        )}
 
         {/* Local metrics cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
@@ -255,9 +351,11 @@ export function ExplainabilityPage() {
               <div className="relative w-16 h-16 shrink-0">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                   <circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#d6d8de" strokeWidth="3"></circle>
-                  <circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#6366f1" strokeDasharray="92, 100" strokeWidth="3"></circle>
+                  <circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#6366f1" strokeDasharray={`${assessment ? Math.round(assessment.confidence_score * 100) : 92}, 100`} strokeWidth="3"></circle>
                 </svg>
-                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold font-mono">92%</span>
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold font-mono">
+                  {assessment ? Math.round(assessment.confidence_score * 100) : 92}%
+                </span>
               </div>
               <p className="text-xs leading-relaxed text-on-surface-variant">
                 High fidelity explanation. SHAP residuals are within acceptable 2% tolerance.
@@ -270,7 +368,7 @@ export function ExplainabilityPage() {
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
               <p className="text-xs leading-relaxed text-on-surface-variant">
-                Feature <span className="font-semibold text-on-surface">Total Credit Limit</span> interacted strongly with <span className="font-semibold text-on-surface">Payment History</span> for this specific applicant.
+                Feature <span className="font-semibold text-on-surface">{explanation?.top_features?.[0]?.name?.replace(/_/g, ' ') || 'Total Credit Limit'}</span> interacted strongly with <span className="font-semibold text-on-surface">{explanation?.top_features?.[1]?.name?.replace(/_/g, ' ') || 'Payment History'}</span> for this applicant.
               </p>
             </div>
           </div>
@@ -278,10 +376,24 @@ export function ExplainabilityPage() {
           <div className="p-5 rounded-xl border border-slate-100 shadow-sm bg-white">
             <h5 className="text-xs font-bold text-on-surface-variant uppercase mb-3">Action Recommended</h5>
             <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-              <p className="text-xs leading-relaxed text-on-surface-variant">
-                Standard automatic processing recommended. The decision is highly stable under local perturbance.
-              </p>
+              {(() => {
+                const riskRating = assessment?.risk_level || 'medium';
+                const isLow = riskRating === 'low';
+                const isHigh = riskRating === 'high';
+                const iconColor = isLow ? 'text-green-600' : isHigh ? 'text-red-500' : 'text-amber-500';
+                const IconComponent = isLow ? CheckCircle : AlertTriangle;
+                const actionText = isLow ? 'Standard automatic processing recommended. The decision is highly stable.' :
+                                   isHigh ? 'Automatic rejection recommended. High probability of default exceeds threshold.' :
+                                   'Secondary manual review recommended. Moderate risk factors detected.';
+                return (
+                  <>
+                    <IconComponent className={`w-5 h-5 ${iconColor} shrink-0 mt-0.5`} />
+                    <p className="text-xs leading-relaxed text-on-surface-variant">
+                      {actionText}
+                    </p>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
