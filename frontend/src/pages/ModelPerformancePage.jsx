@@ -159,22 +159,22 @@ export function ModelPerformancePage() {
           <div className="grid grid-cols-2 gap-4">
             {/* Cell TP */}
             <div className="aspect-square flex flex-col items-center justify-center rounded-2xl bg-indigo-50/50 border border-indigo-100">
-              <span className="text-primary font-bold text-2xl font-mono">4,281</span>
+              <span className="text-primary font-bold text-2xl font-mono">227</span>
               <span className="text-[9px] font-bold text-primary uppercase mt-1">True Positive</span>
             </div>
             {/* Cell FP */}
             <div className="aspect-square flex flex-col items-center justify-center rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-on-surface font-bold text-2xl font-mono">142</span>
+              <span className="text-on-surface font-bold text-2xl font-mono">409</span>
               <span className="text-[9px] font-bold text-on-surface-variant uppercase mt-1">False Positive</span>
             </div>
             {/* Cell FN */}
             <div className="aspect-square flex flex-col items-center justify-center rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-on-surface font-bold text-2xl font-mono">319</span>
+              <span className="text-on-surface font-bold text-2xl font-mono">76</span>
               <span className="text-[9px] font-bold text-on-surface-variant uppercase mt-1">False Negative</span>
             </div>
             {/* Cell TN */}
             <div className="aspect-square flex flex-col items-center justify-center rounded-2xl bg-emerald-50/50 border border-emerald-100">
-              <span className="text-tertiary font-bold text-2xl font-mono">12,894</span>
+              <span className="text-tertiary font-bold text-2xl font-mono">3,038</span>
               <span className="text-[9px] font-bold text-tertiary uppercase mt-1">True Negative</span>
             </div>
           </div>
@@ -228,7 +228,7 @@ export function ModelPerformancePage() {
 
               <div>
                 <div className="flex justify-between text-xs font-bold mb-1.5 text-on-surface">
-                  <span>Credit Utilization</span>
+                  <span>Credit Score</span>
                   <span className="text-primary font-mono">0.45 Impact</span>
                 </div>
                 <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
@@ -244,12 +244,12 @@ export function ModelPerformancePage() {
               <p className="text-xs text-on-surface-variant">Global p99 latency in production environment</p>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-extrabold text-on-surface font-mono tracking-tighter">184</span>
+              <span className="text-5xl font-extrabold text-on-surface font-mono tracking-tighter">88</span>
               <span className="text-lg font-bold text-primary">ms</span>
             </div>
             <p className="mt-3 text-[10px] font-bold text-green-600 flex items-center gap-1">
               <TrendingDown className="w-3.5 h-3.5" />
-              12% faster latency than previous release
+              Under 100ms target latency threshold
             </p>
             <div className="mt-6 flex gap-2">
               <div className="h-10 w-full rounded-xl flex items-center justify-center bg-slate-100 border border-slate-200 relative">
@@ -268,7 +268,7 @@ export function ModelPerformancePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6">
             <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">Model Topology</span>
-            <p className="text-white font-extrabold">XGBoost-LGBM Hybrid</p>
+            <p className="text-white font-extrabold">XGBoost Classifier</p>
           </div>
         </div>
       </section>
