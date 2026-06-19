@@ -25,7 +25,7 @@ export function DatasetInsightsPage() {
           </p>
         </div>
         <div className="relative group">
-          <div className="neo-inset px-4 py-2 rounded-full flex items-center gap-2 w-64 transition-all focus-within:w-80 bg-[#e8eaf0]">
+          <div className="px-4 py-2 rounded-full flex items-center gap-2 w-64 transition-all focus-within:w-80 bg-slate-50 border border-slate-200 shadow-sm animate-slideIn">
             <Search className="w-4 h-4 text-on-surface-variant/60" />
             <input 
               type="text" 
@@ -40,7 +40,7 @@ export function DatasetInsightsPage() {
 
       {/* Summary Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="neo-raised p-6 rounded-2xl bg-background flex flex-col justify-between">
+        <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white flex flex-col justify-between">
           <div className="flex justify-between items-start">
             <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Total Records</p>
             <Database className="text-primary w-5 h-5" />
@@ -52,7 +52,7 @@ export function DatasetInsightsPage() {
           </div>
         </div>
 
-        <div className="neo-raised p-6 rounded-2xl bg-background flex flex-col justify-between">
+        <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white flex flex-col justify-between">
           <div className="flex justify-between items-start">
             <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Missing Values</p>
             <AlertOctagon className="text-red-500 w-5 h-5" />
@@ -64,7 +64,7 @@ export function DatasetInsightsPage() {
           </div>
         </div>
 
-        <div className="neo-raised p-6 rounded-2xl bg-background flex flex-col justify-between">
+        <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white flex flex-col justify-between">
           <div className="flex justify-between items-start">
             <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Outlier Ratio</p>
             <AlertOctagon className="text-amber-500 w-5 h-5" />
@@ -76,7 +76,7 @@ export function DatasetInsightsPage() {
           </div>
         </div>
 
-        <div className="neo-raised p-6 rounded-2xl bg-background flex flex-col justify-between">
+        <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white flex flex-col justify-between">
           <div className="flex justify-between items-start">
             <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Feature Count</p>
             <List className="text-primary w-5 h-5" />
@@ -91,18 +91,18 @@ export function DatasetInsightsPage() {
       {/* Main Insights Section (Bento Grid) */}
       <div className="grid grid-cols-12 gap-8">
         {/* Distribution Histograms */}
-        <div className="col-span-12 lg:col-span-8 neo-raised p-8 rounded-3xl bg-background overflow-hidden relative">
+        <div className="col-span-12 lg:col-span-8 p-8 rounded-2xl border border-slate-100 shadow-sm bg-white overflow-hidden relative">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div>
               <h3 className="text-lg font-bold text-on-surface">Feature Distribution</h3>
               <p className="text-xs text-on-surface-variant">Analyzing density across primary risk factors</p>
             </div>
-            <div className="neo-inset p-1 rounded-xl flex gap-1 bg-[#e8eaf0]">
+            <div className="p-1 rounded-xl flex gap-1 bg-slate-100 border border-slate-200">
               {['Income', 'Credit Score', 'Loan Amount'].map((f) => (
                 <button
                   key={f}
                   onClick={() => setActiveFeature(f)}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeFeature === f ? 'neo-raised text-primary bg-[#e8eaf0]' : 'text-on-surface-variant hover:text-on-surface'}`}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeFeature === f ? 'text-indigo-600 bg-white shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-800'}`}
                 >
                   {f}
                 </button>
@@ -134,7 +134,7 @@ export function DatasetInsightsPage() {
         </div>
 
         {/* Summary Statistics Card */}
-        <div className="col-span-12 lg:col-span-4 neo-raised p-8 rounded-3xl bg-background flex flex-col">
+        <div className="col-span-12 lg:col-span-4 p-8 rounded-2xl border border-slate-100 shadow-sm bg-white flex flex-col">
           <h3 className="text-lg font-bold text-on-surface mb-6">Variable Statistics</h3>
           <div className="flex-1 space-y-5">
             <div className="space-y-1">
@@ -142,7 +142,7 @@ export function DatasetInsightsPage() {
                 <span className="text-on-surface-variant">Mean</span>
                 <span className="font-bold text-on-surface font-mono">$72,492.00</span>
               </div>
-              <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden neo-inset p-[1px]">
+              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                 <div className="h-full bg-primary rounded-full" style={{ width: '68%' }}></div>
               </div>
             </div>
@@ -151,7 +151,7 @@ export function DatasetInsightsPage() {
                 <span className="text-on-surface-variant">Median</span>
                 <span className="font-bold text-on-surface font-mono">$68,000.00</span>
               </div>
-              <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden neo-inset p-[1px]">
+              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                 <div className="h-full bg-primary rounded-full" style={{ width: '62%' }}></div>
               </div>
             </div>
@@ -160,7 +160,7 @@ export function DatasetInsightsPage() {
                 <span className="text-on-surface-variant">Std. Deviation</span>
                 <span className="font-bold text-on-surface font-mono">$14,203.11</span>
               </div>
-              <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden neo-inset p-[1px]">
+              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                 <div className="h-full bg-tertiary rounded-full" style={{ width: '25%' }}></div>
               </div>
             </div>
@@ -169,19 +169,19 @@ export function DatasetInsightsPage() {
                 <span className="text-on-surface-variant">Skewness</span>
                 <span className="font-bold text-red-500 font-mono">1.42 (High)</span>
               </div>
-              <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden neo-inset p-[1px]">
+              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                 <div className="h-full bg-red-500 rounded-full" style={{ width: '75%' }}></div>
               </div>
             </div>
           </div>
-          <button className="mt-8 w-full neo-raised py-3 rounded-xl font-bold text-primary active:scale-95 transition-all text-xs bg-[#e8eaf0]">
+          <button className="mt-8 w-full py-3 rounded-xl border border-slate-200 font-bold text-slate-700 active:scale-95 transition-all text-xs bg-slate-50 hover:bg-slate-100">
             Download Statistics CSV
           </button>
         </div>
       </div>
 
       {/* Correlation Matrix */}
-      <div className="neo-raised p-8 rounded-3xl bg-background">
+      <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h3 className="text-lg font-bold text-on-surface">Correlation Matrix</h3>
@@ -209,41 +209,41 @@ export function DatasetInsightsPage() {
             
             {/* Row 1: Age */}
             <div className="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant flex items-center">Age</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-primary text-white text-xs font-bold font-mono">1.0</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-primary/40 text-on-surface text-xs font-bold font-mono">0.4</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-[#d6d8de] text-on-surface-variant text-xs font-bold font-mono">-0.1</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-primary/20 text-on-surface text-xs font-bold font-mono">0.2</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-red-500/20 text-on-surface text-xs font-bold font-mono">-0.2</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-[#d6d8de] text-on-surface-variant text-xs font-bold font-mono">0.0</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-primary text-white text-xs font-bold font-mono">1.0</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-primary/40 text-on-surface text-xs font-bold font-mono">0.4</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-[#d6d8de] text-on-surface-variant text-xs font-bold font-mono">-0.1</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-primary/20 text-on-surface text-xs font-bold font-mono">0.2</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-red-500/20 text-on-surface text-xs font-bold font-mono">-0.2</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-[#d6d8de] text-on-surface-variant text-xs font-bold font-mono">0.0</div>
 
             {/* Row 2: Income */}
             <div className="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant flex items-center">Income</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-primary/40 text-on-surface text-xs font-bold font-mono">0.4</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-primary text-white text-xs font-bold font-mono">1.0</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-red-500/40 text-on-surface text-xs font-bold font-mono">-0.5</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-primary/60 text-on-surface text-xs font-bold font-mono">0.7</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-red-500/10 text-on-surface text-xs font-bold font-mono">-0.1</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-red-500/30 text-on-surface text-xs font-bold font-mono">-0.3</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-primary/40 text-on-surface text-xs font-bold font-mono">0.4</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-primary text-white text-xs font-bold font-mono">1.0</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-red-500/40 text-on-surface text-xs font-bold font-mono">-0.5</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-primary/60 text-on-surface text-xs font-bold font-mono">0.7</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-red-500/10 text-on-surface text-xs font-bold font-mono">-0.1</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-red-500/30 text-on-surface text-xs font-bold font-mono">-0.3</div>
 
             {/* Row 3: DTI */}
             <div className="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant flex items-center">DTI Ratio</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-[#d6d8de] text-on-surface-variant text-xs font-bold font-mono">-0.1</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-red-500/40 text-on-surface text-xs font-bold font-mono">-0.5</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-primary text-white text-xs font-bold font-mono">1.0</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-red-500/60 text-on-surface text-xs font-bold font-mono">-0.8</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-primary/60 text-on-surface text-xs font-bold font-mono">0.6</div>
-            <div className="aspect-square neo-inset rounded-lg flex items-center justify-center bg-primary/80 text-on-surface text-xs font-bold font-mono">0.9</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-[#d6d8de] text-on-surface-variant text-xs font-bold font-mono">-0.1</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-red-500/40 text-on-surface text-xs font-bold font-mono">-0.5</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-primary text-white text-xs font-bold font-mono">1.0</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-red-500/60 text-on-surface text-xs font-bold font-mono">-0.8</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-primary/60 text-on-surface text-xs font-bold font-mono">0.6</div>
+            <div className="aspect-square rounded-lg border border-slate-200/50 flex items-center justify-center bg-primary/80 text-on-surface text-xs font-bold font-mono">0.9</div>
           </div>
         </div>
       </div>
 
       {/* Missing Values / Health Drilldown */}
-      <div className="neo-raised p-8 rounded-3xl bg-background overflow-x-auto">
+      <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white overflow-x-auto">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-lg font-bold text-on-surface">Health Status by Feature</h3>
           <div className="flex gap-2">
-            <span className="px-3 py-1 rounded-full neo-inset text-[10px] font-bold text-green-700 bg-green-50 font-mono">STABLE</span>
-            <span className="px-3 py-1 rounded-full neo-inset text-[10px] font-bold text-red-600 bg-red-50 font-mono">NEEDS REVIEW</span>
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold text-green-700 bg-green-50 border border-green-200/50 font-mono">STABLE</span>
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-200/50 font-mono">NEEDS REVIEW</span>
           </div>
         </div>
         <table className="w-full text-left border-separate border-spacing-y-4">
@@ -258,7 +258,7 @@ export function DatasetInsightsPage() {
             </tr>
           </thead>
           <tbody>
-            <tr className="neo-inset rounded-xl overflow-hidden bg-white/40">
+            <tr className="rounded-xl overflow-hidden bg-slate-50/50 border border-slate-100">
               <td className="py-4 pl-6 font-semibold text-sm">annual_income</td>
               <td className="py-4 text-xs font-mono">float64</td>
               <td className="py-4 text-sm font-mono">12 (0.001%)</td>
@@ -270,7 +270,7 @@ export function DatasetInsightsPage() {
                 <button className="text-primary hover:underline text-xs font-bold">Inspect</button>
               </td>
             </tr>
-            <tr className="neo-inset rounded-xl overflow-hidden bg-white/40">
+            <tr className="rounded-xl overflow-hidden bg-slate-50/50 border border-slate-100">
               <td className="py-4 pl-6 font-semibold text-sm">home_ownership</td>
               <td className="py-4 text-xs font-mono">category</td>
               <td className="py-4 text-sm font-mono">0 (0.000%)</td>
@@ -282,7 +282,7 @@ export function DatasetInsightsPage() {
                 <button className="text-primary hover:underline text-xs font-bold">Inspect</button>
               </td>
             </tr>
-            <tr className="neo-inset rounded-xl overflow-hidden bg-red-500/5">
+            <tr className="rounded-xl overflow-hidden bg-red-50/5 border border-red-100">
               <td className="py-4 pl-6 font-semibold text-sm">employment_history</td>
               <td className="py-4 text-xs font-mono">int64</td>
               <td className="py-4 text-sm font-mono">4,812 (0.38%)</td>

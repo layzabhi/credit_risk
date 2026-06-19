@@ -10,12 +10,16 @@ import {
   CheckCircle,
   ScatterChart,
   Sparkles,
-  Cpu
+  Cpu,
+  X
 } from 'lucide-react';
 
 export function ExplainabilityPage() {
   const [searchTerm, setSearchTerm] = useState('ID-8842-XJ');
   const [isCalculating, setIsCalculating] = useState(false);
+  const [showShiftDetails, setShowShiftDetails] = useState(false);
+  const [isRetraining, setIsRetraining] = useState(false);
+  const [retrained, setRetrained] = useState(false);
 
   const handleRecalculate = () => {
     setIsCalculating(true);
@@ -31,17 +35,17 @@ export function ExplainabilityPage() {
         <div>
           <h3 className="text-3xl font-headline font-bold tracking-tight text-on-surface">Model Interpretability</h3>
           <p className="text-on-surface-variant mt-1">
-            Analyzing SHAP values and feature contributions for the XGBoost Default Predictor (v4.2).
+            Analyzing SHAP values and feature contributions for the XGBoost Default Predictor (v1.0).
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="px-6 py-2.5 rounded-xl neo-raised text-primary font-semibold flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all bg-[#e8eaf0]">
+          <button className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold flex items-center gap-2 hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98] transition-all bg-white shadow-sm">
             <Download className="w-4 h-4" />
             Export PDF
           </button>
           <button
             onClick={handleRecalculate}
-            className={`px-6 py-2.5 rounded-xl neo-raised bg-primary text-white font-semibold flex items-center gap-2 hover:opacity-90 transition-all ${isCalculating && 'opacity-75'}`}
+            className={`px-6 py-2.5 rounded-xl bg-primary text-white font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm ${isCalculating && 'opacity-75'}`}
           >
             <RefreshCw className={`w-4 h-4 ${isCalculating && 'animate-spin'}`} />
             {isCalculating ? 'Calculating...' : 'Recalculate'}
@@ -52,13 +56,13 @@ export function ExplainabilityPage() {
       {/* Global Importance Bento Grid Section */}
       <div className="grid grid-cols-12 gap-8">
         {/* Global Feature Importance */}
-        <div className="col-span-12 lg:col-span-8 p-6 rounded-2xl neo-raised bg-background">
+        <div className="col-span-12 lg:col-span-8 p-6 rounded-2xl border border-slate-100 shadow-sm bg-white">
           <div className="flex justify-between items-center mb-6">
             <h4 className="font-semibold text-lg flex items-center gap-2 text-on-surface">
               <BarChart3 className="w-5 h-5 text-primary" />
               Global Feature Importance (SHAP)
             </h4>
-            <span className="text-xs font-bold px-3 py-1 rounded-full neo-inset text-on-surface-variant bg-[#e8eaf0]">
+            <span className="text-xs font-bold px-3 py-1 rounded-full text-slate-500 bg-slate-100 border border-slate-200">
               Top 5 Features
             </span>
           </div>
@@ -68,7 +72,7 @@ export function ExplainabilityPage() {
                 <span className="font-medium text-on-surface">Debt-to-Income Ratio</span>
                 <span className="text-on-surface-variant font-mono">0.342</span>
               </div>
-              <div className="h-3 w-full bg-surface-container rounded-full overflow-hidden neo-inset p-[1px]">
+              <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                 <div className="h-full bg-primary rounded-full transition-all duration-1000 ease-out" style={{ width: '88%' }}></div>
               </div>
             </div>
@@ -78,7 +82,7 @@ export function ExplainabilityPage() {
                 <span className="font-medium text-on-surface">Total Credit Limit</span>
                 <span className="text-on-surface-variant font-mono">0.289</span>
               </div>
-              <div className="h-3 w-full bg-surface-container rounded-full overflow-hidden neo-inset p-[1px]">
+              <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                 <div className="h-full bg-primary/80 rounded-full transition-all duration-1000 ease-out" style={{ width: '72%' }}></div>
               </div>
             </div>
@@ -88,7 +92,7 @@ export function ExplainabilityPage() {
                 <span className="font-medium text-on-surface">Employment Tenure</span>
                 <span className="text-on-surface-variant font-mono">0.215</span>
               </div>
-              <div className="h-3 w-full bg-surface-container rounded-full overflow-hidden neo-inset p-[1px]">
+              <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                 <div className="h-full bg-primary/70 rounded-full transition-all duration-1000 ease-out" style={{ width: '58%' }}></div>
               </div>
             </div>
@@ -98,7 +102,7 @@ export function ExplainabilityPage() {
                 <span className="font-medium text-on-surface">Inquiries Last 6 Months</span>
                 <span className="text-on-surface-variant font-mono">0.198</span>
               </div>
-              <div className="h-3 w-full bg-surface-container rounded-full overflow-hidden neo-inset p-[1px]">
+              <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                 <div className="h-full bg-primary/60 rounded-full transition-all duration-1000 ease-out" style={{ width: '52%' }}></div>
               </div>
             </div>
@@ -108,7 +112,7 @@ export function ExplainabilityPage() {
                 <span className="font-medium text-on-surface">Revolving Balance</span>
                 <span className="text-on-surface-variant font-mono">0.124</span>
               </div>
-              <div className="h-3 w-full bg-surface-container rounded-full overflow-hidden neo-inset p-[1px]">
+              <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                 <div className="h-full bg-primary/50 rounded-full transition-all duration-1000 ease-out" style={{ width: '35%' }}></div>
               </div>
             </div>
@@ -118,21 +122,21 @@ export function ExplainabilityPage() {
         {/* Contributors Summary */}
         <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
           {/* Top Positive Contributors (Reduces Risk) */}
-          <div className="p-6 rounded-2xl neo-raised bg-background">
+          <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white">
             <h4 className="font-semibold text-sm text-green-600 flex items-center gap-2 mb-4 uppercase tracking-wider">
               <TrendingDown className="w-4 h-4 text-green-600" />
               Risk Mitigators
             </h4>
             <ul className="space-y-3">
-              <li className="flex items-center justify-between p-3 rounded-xl neo-inset bg-[#e2e4ea]">
+              <li className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-sm font-medium">Home Ownership (Mortgage)</span>
                 <span className="text-xs font-bold text-green-600 font-mono">+12.0%</span>
               </li>
-              <li className="flex items-center justify-between p-3 rounded-xl neo-inset bg-[#e2e4ea]">
+              <li className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-sm font-medium">Verified Income Source</span>
                 <span className="text-xs font-bold text-green-600 font-mono">+8.5%</span>
               </li>
-              <li className="flex items-center justify-between p-3 rounded-xl neo-inset bg-[#e2e4ea]">
+              <li className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-sm font-medium">Advanced Degree</span>
                 <span className="text-xs font-bold text-green-600 font-mono">+4.2%</span>
               </li>
@@ -140,21 +144,21 @@ export function ExplainabilityPage() {
           </div>
 
           {/* Top Negative Contributors (Increases Risk) */}
-          <div className="p-6 rounded-2xl neo-raised bg-background">
+          <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white">
             <h4 className="font-semibold text-sm text-red-500 flex items-center gap-2 mb-4 uppercase tracking-wider">
               <TrendingUp className="w-4 h-4 text-red-500" />
               Risk Drivers
             </h4>
             <ul className="space-y-3">
-              <li className="flex items-center justify-between p-3 rounded-xl neo-inset bg-[#e2e4ea]">
+              <li className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-sm font-medium">Revolving Utilization &gt; 80%</span>
                 <span className="text-xs font-bold text-red-500 font-mono">-15.4%</span>
               </li>
-              <li className="flex items-center justify-between p-3 rounded-xl neo-inset bg-[#e2e4ea]">
+              <li className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-sm font-medium">Recent Missed Payment</span>
                 <span className="text-xs font-bold text-red-500 font-mono">-11.2%</span>
               </li>
-              <li className="flex items-center justify-between p-3 rounded-xl neo-inset bg-[#e2e4ea]">
+              <li className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-sm font-medium">Short Credit History &lt; 2 yrs</span>
                 <span className="text-xs font-bold text-red-500 font-mono">-9.8%</span>
               </li>
@@ -164,7 +168,7 @@ export function ExplainabilityPage() {
       </div>
 
       {/* Local Explanation Section */}
-      <div className="p-8 rounded-2xl neo-raised bg-background">
+      <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h4 className="font-semibold text-xl flex items-center gap-2 text-on-surface">
@@ -176,7 +180,7 @@ export function ExplainabilityPage() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="neo-inset px-4 py-2 rounded-full flex items-center gap-2 w-64 bg-[#e8eaf0]">
+            <div className="px-4 py-2 rounded-full flex items-center gap-2 w-64 bg-slate-50 border border-slate-200">
               <Search className="w-4 h-4 text-outline" />
               <input
                 type="text"
@@ -200,7 +204,7 @@ export function ExplainabilityPage() {
         </div>
 
         {/* Force Plot Visualization Placeholder */}
-        <div className="relative h-56 w-full neo-inset rounded-2xl bg-[#e2e4ea] flex flex-col items-center justify-center overflow-hidden p-6">
+        <div className="relative h-56 w-full rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center overflow-hidden p-6">
           <div className="absolute inset-0 flex items-center px-12">
             {/* Negative Forces (Risk Drivers - Red) */}
             <div className="flex-1 flex flex-col items-end gap-2 pr-6">
@@ -216,7 +220,7 @@ export function ExplainabilityPage() {
             </div>
 
             {/* Center Point Circle */}
-            <div className="z-10 w-16 h-16 rounded-full bg-background neo-raised flex flex-col items-center justify-center border-2 border-primary shrink-0">
+            <div className="z-10 w-16 h-16 rounded-full bg-white shadow-md flex flex-col items-center justify-center border-2 border-primary shrink-0">
               <span className="text-xs font-bold text-on-surface-variant uppercase text-[8px]">Output</span>
               <span className="text-sm font-extrabold text-primary font-mono leading-none">0.78</span>
             </div>
@@ -245,7 +249,7 @@ export function ExplainabilityPage() {
 
         {/* Local metrics cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <div className="p-5 rounded-xl neo-raised bg-background">
+          <div className="p-5 rounded-xl border border-slate-100 shadow-sm bg-white">
             <h5 className="text-xs font-bold text-on-surface-variant uppercase mb-3">Model Confidence</h5>
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16 shrink-0">
@@ -261,7 +265,7 @@ export function ExplainabilityPage() {
             </div>
           </div>
 
-          <div className="p-5 rounded-xl neo-raised bg-background">
+          <div className="p-5 rounded-xl border border-slate-100 shadow-sm bg-white">
             <h5 className="text-xs font-bold text-on-surface-variant uppercase mb-3">Interaction Alerts</h5>
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
@@ -271,7 +275,7 @@ export function ExplainabilityPage() {
             </div>
           </div>
 
-          <div className="p-5 rounded-xl neo-raised bg-background">
+          <div className="p-5 rounded-xl border border-slate-100 shadow-sm bg-white">
             <h5 className="text-xs font-bold text-on-surface-variant uppercase mb-3">Action Recommended</h5>
             <div className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
@@ -286,13 +290,13 @@ export function ExplainabilityPage() {
       {/* Asymmetric Bottom Section */}
       <div className="grid grid-cols-12 gap-8">
         {/* Dependence Plot */}
-        <div className="col-span-12 lg:col-span-7 p-6 rounded-2xl neo-raised bg-background h-80 relative overflow-hidden">
+        <div className="col-span-12 lg:col-span-7 p-6 rounded-2xl border border-slate-100 shadow-sm bg-white h-80 relative overflow-hidden">
           <h4 className="font-semibold text-lg flex items-center gap-2 mb-4 text-on-surface">
             <ScatterChart className="w-5 h-5 text-tertiary" />
             Feature Dependence: Income vs. SHAP
           </h4>
 
-          <div className="w-full h-44 neo-inset rounded-xl bg-[#e2e4ea] flex items-center justify-center p-4 relative">
+          <div className="w-full h-44 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center p-4 relative">
             <div className="absolute bottom-10 left-12 right-12 h-px bg-outline-variant/60"></div>
             <div className="absolute top-10 bottom-10 left-16 w-px bg-outline-variant/60"></div>
             <div className="absolute bottom-3 text-[10px] font-bold text-on-surface-variant w-full text-center">
@@ -322,22 +326,243 @@ export function ExplainabilityPage() {
         </div>
 
         {/* System Alert Insight Card */}
-        <div className="col-span-12 lg:col-span-5 p-8 rounded-2xl bg-indigo-900 text-white neo-raised flex flex-col justify-between">
+        <div className="col-span-12 lg:col-span-5 p-8 rounded-2xl bg-indigo-900 text-white shadow-lg flex flex-col justify-between">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 flex items-center gap-1.5">
               <Cpu className="w-3.5 h-3.5" />
               System Insight
             </span>
             <h4 className="text-2xl font-bold mt-2 text-white">Feature Shift Detected</h4>
-            <p className="mt-4 opacity-90 text-xs leading-relaxed">
-              The explainability engine has noted a 4% shift in feature importance for 'Employment Tenure' over the last 30 days. Consider retraining the model with recent quarterly data.
+            <p className="mt-4 opacity-90 text-xs leading-relaxed text-slate-100">
+              {retrained ? (
+                "Drift successfully resolved. Model has been retrained with recent quarterly data. Current shift metrics have been reset to optimal levels."
+              ) : (
+                "The explainability engine has noted a 4% shift in feature importance for 'Employment Tenure' over the last 30 days. Consider retraining the model with recent quarterly data."
+              )}
             </p>
           </div>
-          <button className="mt-6 w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 transition-all border border-white/20 font-bold text-xs">
+          <button
+            onClick={() => setShowShiftDetails(true)}
+            className="mt-6 w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 transition-all border border-white/20 font-bold text-xs cursor-pointer"
+          >
             Analyze Shift Details
           </button>
         </div>
       </div>
+
+      {showShiftDetails && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transition-all duration-300 transform scale-100 flex flex-col text-slate-800 dark:text-slate-200">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-150 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">
+                  <Cpu className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg text-slate-900 dark:text-white">Feature Shift Analysis</h4>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">System Alert Insight</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowShiftDetails(false)}
+                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6 overflow-y-auto max-h-[70vh]">
+              {/* Warning/Alert box */}
+              <div className={`p-4 rounded-xl border flex gap-3 ${retrained ? 'bg-green-50 dark:bg-green-950/20 border-green-200/50 dark:border-green-800/30' : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-800/30'}`}>
+                {retrained ? (
+                  <CheckCircle className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                ) : (
+                  <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                )}
+                <div>
+                  <h5 className={`font-bold text-xs uppercase tracking-wider ${retrained ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300'}`}>
+                    {retrained ? 'Status: Resolved' : 'Drift Alert Summary'}
+                  </h5>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">
+                    {retrained ? (
+                      "Drift successfully resolved. Model has been retrained with recent quarterly data. Current shift metrics have been reset to optimal levels."
+                    ) : (
+                      "A significant shift of -4.0% in feature importance was detected for 'Employment Tenure' over the last 30 days. This indicates that the model's reliance on this feature is decreasing due to changes in applicant profile distributions."
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Data Table Comparison */}
+              <div className="space-y-3">
+                <h5 className="font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Feature Importance Shift (SHAP)</h5>
+                <div className="border border-slate-150 dark:border-slate-800 rounded-xl overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 border-b border-slate-150 dark:border-slate-800">
+                        <th className="px-4 py-3">Feature Name</th>
+                        <th className="px-4 py-3 text-right">30 Days Ago</th>
+                        <th className="px-4 py-3 text-right">Today</th>
+                        <th className="px-4 py-3 text-right">Shift Value</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-150 dark:divide-slate-800 text-sm">
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">Employment Tenure</td>
+                        <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400 font-mono">21.5%</td>
+                        <td className="px-4 py-3 text-right text-slate-900 dark:text-white font-mono">{retrained ? '21.5%' : '17.5%'}</td>
+                        <td className={`px-4 py-3 text-right font-mono font-bold ${retrained ? 'text-slate-500 dark:text-slate-400' : 'text-red-500'}`}>{retrained ? '0.0%' : '-4.0%'}</td>
+                      </tr>
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">Debt-to-Income Ratio</td>
+                        <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400 font-mono">34.2%</td>
+                        <td className="px-4 py-3 text-right text-slate-900 dark:text-white font-mono">{retrained ? '34.2%' : '35.2%'}</td>
+                        <td className={`px-4 py-3 text-right font-mono font-bold ${retrained ? 'text-slate-500 dark:text-slate-400' : 'text-green-600'}`}>{retrained ? '0.0%' : '+1.0%'}</td>
+                      </tr>
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">Total Credit Limit</td>
+                        <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400 font-mono">28.9%</td>
+                        <td className="px-4 py-3 text-right text-slate-900 dark:text-white font-mono">{retrained ? '28.9%' : '30.2%'}</td>
+                        <td className={`px-4 py-3 text-right font-mono font-bold ${retrained ? 'text-slate-500 dark:text-slate-400' : 'text-green-600'}`}>{retrained ? '0.0%' : '+1.3%'}</td>
+                      </tr>
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">Revolving Balance</td>
+                        <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400 font-mono">12.4%</td>
+                        <td className="px-4 py-3 text-right text-slate-900 dark:text-white font-mono">{retrained ? '12.4%' : '14.1%'}</td>
+                        <td className={`px-4 py-3 text-right font-mono font-bold ${retrained ? 'text-slate-500 dark:text-slate-400' : 'text-green-600'}`}>{retrained ? '0.0%' : '+1.7%'}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Graphical Visualizer */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <h5 className="font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Shift Comparison Chart</h5>
+                  <div className="flex items-center gap-3 text-xs font-bold">
+                    <div className="flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 bg-slate-350 dark:bg-slate-600 rounded-sm"></span>
+                      <span className="text-slate-500 dark:text-slate-400">30 Days Ago</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 bg-indigo-600 rounded-sm"></span>
+                      <span className="text-slate-900 dark:text-white">Today</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-800 space-y-4">
+                  {/* Item 1 */}
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      <span>Employment Tenure</span>
+                      <span>{retrained ? '21.5% vs 21.5%' : '21.5% vs 17.5%'}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-slate-400 dark:bg-slate-500" style={{ width: '21.5%' }}></div>
+                      </div>
+                      <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: retrained ? '21.5%' : '17.5%' }}></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Item 2 */}
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      <span>Debt-to-Income Ratio</span>
+                      <span>{retrained ? '34.2% vs 34.2%' : '34.2% vs 35.2%'}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-slate-400 dark:bg-slate-500" style={{ width: '34.2%' }}></div>
+                      </div>
+                      <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: retrained ? '34.2%' : '35.2%' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status metrics */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl border border-slate-150 dark:border-slate-800 bg-white dark:bg-slate-900">
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Population Stability Index (PSI)</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">{retrained ? '0.02' : '0.11'}</span>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${retrained ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'}`}>
+                      {retrained ? 'Optimal' : 'Moderate Drift'}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-150 dark:border-slate-800 bg-white dark:bg-slate-900">
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Action Recommended</span>
+                  <div className="mt-1.5 flex items-center gap-1.5 font-bold text-xs">
+                    {retrained ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                        <span className="text-green-700 dark:text-green-400">Model up-to-date</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle className="w-4 h-4 text-amber-600" />
+                        <span className="text-amber-700 dark:text-amber-400">Retraining suggested</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-150 dark:border-slate-800 flex justify-between items-center gap-3">
+              <button
+                onClick={() => {
+                  setShowShiftDetails(false);
+                }}
+                className="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+
+              {!retrained ? (
+                <button
+                  onClick={() => {
+                    setIsRetraining(true);
+                    setTimeout(() => {
+                      setIsRetraining(false);
+                      setRetrained(true);
+                    }, 2000);
+                  }}
+                  disabled={isRetraining}
+                  className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-md shadow-indigo-600/10 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  {isRetraining ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      Retraining Model...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4" />
+                      Retrain Model (XGBoost)
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="flex items-center gap-2 text-green-600 font-bold text-xs">
+                  <CheckCircle className="w-4 h-4" />
+                  XGBoost v1.0 retrained successfully!
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

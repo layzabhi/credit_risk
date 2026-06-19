@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,9 +11,66 @@
   }
 
   body {
-    background-color: #f8f9ff;
+    background-color: #ffffff;
     color: #0b1c30;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Archivo', 'Archivo Fallback', sans-serif;
+  }
+
+  /* Dark Mode Overrides */
+  html.dark body {
+    background-color: #0b1329;
+    color: #f8fafc;
+  }
+
+  html.dark .bg-white {
+    background-color: #111a36 !important;
+  }
+
+  html.dark .text-slate-800, 
+  html.dark .text-slate-700, 
+  html.dark .text-slate-900,
+  html.dark .text-slate-850,
+  html.dark .text-slate-650,
+  html.dark .text-on-surface {
+    color: #f8fafc !important;
+  }
+
+  html.dark .text-slate-600, 
+  html.dark .text-slate-500, 
+  html.dark .text-slate-400,
+  html.dark .text-on-surface-variant {
+    color: #94a3b8 !important;
+  }
+
+  html.dark .bg-slate-50, 
+  html.dark .bg-slate-50\/50, 
+  html.dark .bg-slate-100,
+  html.dark .bg-slate-100\/50,
+  html.dark .bg-slate-200,
+  html.dark .bg-slate-100 {
+    background-color: #0f172a !important;
+  }
+
+  html.dark .hover\:bg-slate-50\/50:hover, 
+  html.dark .hover\:bg-slate-50:hover,
+  html.dark .hover\:bg-slate-100:hover {
+    background-color: #1e293b !important;
+  }
+
+  html.dark .border-slate-100, 
+  html.dark .border-slate-200,
+  html.dark .border-outline-variant {
+    border-color: #1e293b !important;
+  }
+
+  html.dark .nav-sidebar {
+    background-color: #111a36 !important;
+    border-right-color: #1e293b !important;
+  }
+
+  html.dark .nav-sidebar .active-nav {
+    background-color: #1e293b !important;
+    color: #6366f1 !important;
   }
 
   /* Neomorphic Styles */

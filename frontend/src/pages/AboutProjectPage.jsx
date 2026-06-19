@@ -19,7 +19,7 @@ export function AboutProjectPage() {
       {/* Hero Section */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
-          <div className="inline-flex items-center px-4 py-1.5 rounded-full neo-inset text-xs font-bold text-primary tracking-wider uppercase bg-[#e8eaf0]">
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold text-primary tracking-wider uppercase bg-slate-100 border border-slate-200">
             Project Documentation
           </div>
           <h1 className="text-4xl lg:text-5xl font-headline font-bold tracking-tight text-on-surface leading-tight">
@@ -29,17 +29,17 @@ export function AboutProjectPage() {
             RiskLens is an advanced neural-engine designed to harmonize financial prudence with modern data science. We provide transparent, high-precision credit scoring models that empower financial institutions while ensuring consumer fairness.
           </p>
           <div className="flex gap-4">
-            <button className="px-6 py-3 rounded-xl neo-raised text-primary font-semibold flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all bg-[#e8eaf0]">
+            <button className="px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold flex items-center gap-2 hover:bg-slate-55 hover:scale-[1.02] active:scale-[0.98] transition-all bg-white shadow-sm">
               <Download className="w-4 h-4" />
               Whitepaper
             </button>
-            <button className="px-6 py-3 rounded-xl neo-raised text-on-surface-variant font-semibold flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all bg-[#e8eaf0]">
+            <button className="px-6 py-3 rounded-xl border border-slate-200 text-slate-500 font-semibold flex items-center gap-2 hover:bg-slate-55 hover:scale-[1.02] active:scale-[0.98] transition-all bg-white shadow-sm">
               <Mail className="w-4 h-4" />
               Contact Team
             </button>
           </div>
         </div>
-        <div className="relative h-[360px] rounded-3xl overflow-hidden neo-raised p-2">
+        <div className="relative h-[360px] rounded-2xl overflow-hidden border border-slate-100 shadow-sm p-2 bg-white">
           <img
             alt="Financial Data Visualization"
             className="w-full h-full object-cover rounded-2xl grayscale-[20%]"
@@ -55,8 +55,8 @@ export function AboutProjectPage() {
           <p className="text-sm text-on-surface-variant">The pillars of our risk assessment philosophy.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="p-8 rounded-3xl neo-raised bg-background flex flex-col gap-4">
-            <div className="w-12 h-12 rounded-2xl neo-inset flex items-center justify-center text-primary">
+          <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white flex flex-col gap-4">
+            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-primary">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <h4 className="text-lg font-bold text-on-surface">Integrity &amp; Accuracy</h4>
@@ -64,8 +64,8 @@ export function AboutProjectPage() {
               Implementing state-of-the-art XGBoost and Neural Network architectures to maintain a 87.7% accuracy rate in probability-of-default predictions.
             </p>
           </div>
-          <div className="p-8 rounded-3xl neo-raised bg-background flex flex-col gap-4">
-            <div className="w-12 h-12 rounded-2xl neo-inset flex items-center justify-center text-tertiary">
+          <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white flex flex-col gap-4">
+            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-tertiary">
               <Eye className="w-6 h-6 text-tertiary" />
             </div>
             <h4 className="text-lg font-bold text-on-surface">Model Transparency</h4>
@@ -73,8 +73,8 @@ export function AboutProjectPage() {
               Utilizing SHAP and LIME values to ensure every decision made by the system is explainable to stakeholders and regulatory bodies.
             </p>
           </div>
-          <div className="p-8 rounded-3xl neo-raised bg-background flex flex-col gap-4">
-            <div className="w-12 h-12 rounded-2xl neo-inset flex items-center justify-center text-indigo-400">
+          <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white flex flex-col gap-4">
+            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-indigo-400">
               <Scale className="w-6 h-6" />
             </div>
             <h4 className="text-lg font-bold text-on-surface">Ethical Lending</h4>
@@ -86,7 +86,7 @@ export function AboutProjectPage() {
       </section>
 
       {/* Methodology Section */}
-      <section className="p-10 rounded-[2rem] neo-raised bg-background relative overflow-hidden">
+      <section className="p-10 rounded-2xl border border-slate-100 shadow-sm bg-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
           <div className="lg:col-span-2 space-y-4">
@@ -110,19 +110,19 @@ export function AboutProjectPage() {
             </ul>
           </div>
           <div className="lg:col-span-3 grid grid-cols-2 gap-4">
-            <div className="neo-inset p-6 rounded-2xl bg-[#e8eaf0] space-y-2">
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
               <span className="text-[10px] font-bold text-primary tracking-wider uppercase font-mono">1. Data Ingestion</span>
               <p className="text-[11px] text-on-surface-variant">Real-time ETL pipelines from Bureau APIs and internal ledgers.</p>
             </div>
-            <div className="neo-inset p-6 rounded-2xl bg-[#e8eaf0] space-y-2">
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
               <span className="text-[10px] font-bold text-primary tracking-wider uppercase font-mono">2. Pre-processing</span>
               <p className="text-[11px] text-on-surface-variant">Automated handling of missing values and cyclical feature encoding.</p>
             </div>
-            <div className="neo-inset p-6 rounded-2xl bg-[#e8eaf0] space-y-2">
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
               <span className="text-[10px] font-bold text-primary tracking-wider uppercase font-mono">3. Model Inference</span>
               <p className="text-[11px] text-on-surface-variant">Ensemble logic weighing XGBoost, LightGBM, and CatBoost models.</p>
             </div>
-            <div className="neo-inset p-6 rounded-2xl bg-[#e8eaf0] space-y-2">
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
               <span className="text-[10px] font-bold text-primary tracking-wider uppercase font-mono">4. Decision Engine</span>
               <p className="text-[11px] text-on-surface-variant">Risk-adjusted pricing recommendations based on EL and LGD.</p>
             </div>
@@ -130,46 +130,15 @@ export function AboutProjectPage() {
         </div>
       </section>
 
-      {/* Version History & Contact */}
+      {/* Data Science Team */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* Version History */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold text-on-surface tracking-tight">Version History</h3>
-          <div className="space-y-4">
-            <div className="flex gap-6 items-start p-4 rounded-2xl hover:bg-[#e2e4ea] transition-colors group">
-              <div className="text-primary font-bold text-xs min-w-[60px] pt-1 font-mono">v2.4.0</div>
-              <div className="space-y-1">
-                <p className="font-semibold text-on-surface text-sm flex items-center">
-                  Real-time Bias Monitor
-                  <span className="ml-2 text-[9px] px-2 py-0.5 rounded-full neo-inset text-on-surface-variant font-mono">LATEST</span>
-                </p>
-                <p className="text-xs text-on-surface-variant">Introduced Fairlearn integration for automated demographic parity checks.</p>
-              </div>
-            </div>
-            <div className="flex gap-6 items-start p-4 rounded-2xl hover:bg-[#e2e4ea] transition-colors group">
-              <div className="text-on-surface-variant/50 font-bold text-xs min-w-[60px] pt-1 font-mono">v2.3.1</div>
-              <div className="space-y-1">
-                <p className="font-semibold text-on-surface text-sm">SHAP Kernel Optimization</p>
-                <p className="text-xs text-on-surface-variant">Increased explainability computation speed by 45% for complex loan applications.</p>
-              </div>
-            </div>
-            <div className="flex gap-6 items-start p-4 rounded-2xl hover:bg-[#e2e4ea] transition-colors group">
-              <div className="text-on-surface-variant/50 font-bold text-xs min-w-[60px] pt-1 font-mono">v2.2.0</div>
-              <div className="space-y-1">
-                <p className="font-semibold text-on-surface text-sm">Alternative Data Integration</p>
-                <p className="text-xs text-on-surface-variant">Expansion of feature set to include utility and rental payment history records.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Data Science Team */}
         <section className="space-y-6">
           <h3 className="text-2xl font-bold text-on-surface tracking-tight">Data Science Team</h3>
-          <div className="p-8 rounded-[2rem] neo-raised bg-background space-y-6">
+          <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white space-y-6">
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden neo-inset p-[1px] bg-[#e8eaf0]">
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 p-[1px] bg-white">
                   <img
                     alt="Sarah Chen"
                     className="w-full h-full object-cover rounded-full"
@@ -180,13 +149,13 @@ export function AboutProjectPage() {
                   <h4 className="font-bold text-on-surface text-sm">Dr. Sarah Chen</h4>
                   <p className="text-xs text-on-surface-variant">Chief Data Scientist — Research Lead</p>
                 </div>
-                <button className="ml-auto w-9 h-9 rounded-xl neo-raised flex items-center justify-center text-primary hover:scale-105 active:scale-95 transition-all bg-[#e8eaf0]">
+                <button className="ml-auto w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all bg-white shadow-sm">
                   <Mail className="w-4 h-4" />
                 </button>
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden neo-inset p-[1px] bg-[#e8eaf0]">
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 p-[1px] bg-white">
                   <img
                     alt="James Wilson"
                     className="w-full h-full object-cover rounded-full"
@@ -197,7 +166,7 @@ export function AboutProjectPage() {
                   <h4 className="font-bold text-on-surface text-sm">James Wilson</h4>
                   <p className="text-xs text-on-surface-variant">ML Engineer — Infrastructure</p>
                 </div>
-                <button className="ml-auto w-9 h-9 rounded-xl neo-raised flex items-center justify-center text-primary hover:scale-105 active:scale-95 transition-all bg-[#e8eaf0]">
+                <button className="ml-auto w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all bg-white shadow-sm">
                   <Mail className="w-4 h-4" />
                 </button>
               </div>

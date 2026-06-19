@@ -144,7 +144,7 @@ export function SettingsPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 p-1 rounded-2xl neo-inset bg-[#e8eaf0] w-fit">
+      <div className="flex gap-2 p-1 rounded-xl bg-slate-100 border border-slate-200 w-fit">
         {tabs.map(tab => {
           const Icon = tab.icon;
           return (
@@ -154,10 +154,10 @@ export function SettingsPage() {
                 setActiveTab(tab.id);
                 setMessage(null);
               }}
-              className={`flex items-center gap-2 px-4 py-2 font-bold text-xs rounded-xl transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 font-bold text-xs rounded-lg transition-all ${
                 activeTab === tab.id
-                  ? 'neo-raised text-primary bg-[#e8eaf0]'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'text-indigo-600 bg-white shadow-sm border border-slate-200/50'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -168,7 +168,7 @@ export function SettingsPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-background rounded-3xl p-8 max-w-2xl neo-raised space-y-6">
+      <div className="bg-white rounded-2xl p-8 max-w-2xl border border-slate-100 shadow-sm space-y-6">
         {/* Profile Tab */}
         {activeTab === 'profile' && (
           <form onSubmit={handleSaveProfile} className="space-y-5">
@@ -178,7 +178,7 @@ export function SettingsPage() {
             
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">First Name</label>
-              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+              <div className="rounded-xl p-1 bg-slate-50 border border-slate-200 focus-within:border-indigo-500 transition-colors">
                 <input
                   type="text"
                   name="first_name"
@@ -191,7 +191,7 @@ export function SettingsPage() {
 
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">Last Name</label>
-              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+              <div className="rounded-xl p-1 bg-slate-50 border border-slate-200 focus-within:border-indigo-500 transition-colors">
                 <input
                   type="text"
                   name="last_name"
@@ -204,7 +204,7 @@ export function SettingsPage() {
 
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">Email Address</label>
-              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+              <div className="rounded-xl p-1 bg-slate-50 border border-slate-200 focus-within:border-indigo-500 transition-colors">
                 <input
                   type="email"
                   name="email"
@@ -219,7 +219,7 @@ export function SettingsPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs neo-raised transition-all flex items-center gap-2"
+                className="px-6 py-3 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-2"
               >
                 <Save className="w-4 h-4 text-white" />
                 {loading ? 'Saving...' : 'Save Changes'}
@@ -237,7 +237,7 @@ export function SettingsPage() {
 
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">Current Password</label>
-              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+              <div className="rounded-xl p-1 bg-slate-50 border border-slate-200 focus-within:border-indigo-500 transition-colors">
                 <input
                   type="password"
                   name="current_password"
@@ -251,7 +251,7 @@ export function SettingsPage() {
 
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">New Password</label>
-              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+              <div className="rounded-xl p-1 bg-slate-50 border border-slate-200 focus-within:border-indigo-500 transition-colors">
                 <input
                   type="password"
                   name="new_password"
@@ -265,7 +265,7 @@ export function SettingsPage() {
 
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-1">Confirm New Password</label>
-              <div className="neo-inset rounded-xl p-1 bg-[#e8eaf0]">
+              <div className="rounded-xl p-1 bg-slate-50 border border-slate-200 focus-within:border-indigo-500 transition-colors">
                 <input
                   type="password"
                   name="confirm_password"
@@ -281,7 +281,7 @@ export function SettingsPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs neo-raised transition-all flex items-center gap-2"
+                className="px-6 py-3 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-2"
               >
                 <Lock className="w-4 h-4 text-white" />
                 {loading ? 'Changing...' : 'Change Password'}
@@ -298,7 +298,7 @@ export function SettingsPage() {
             </h3>
 
             <div className="space-y-4">
-              <label className="flex items-center gap-3 p-4 rounded-2xl neo-inset bg-[#e2e4ea] cursor-pointer">
+              <label className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100/55 transition-all">
                 <input
                   type="checkbox"
                   name="email_notifications"
@@ -312,7 +312,7 @@ export function SettingsPage() {
                 </div>
               </label>
 
-              <label className="flex items-center gap-3 p-4 rounded-2xl neo-inset bg-[#e2e4ea] cursor-pointer">
+              <label className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100/55 transition-all">
                 <input
                   type="checkbox"
                   name="daily_digest"
@@ -326,7 +326,7 @@ export function SettingsPage() {
                 </div>
               </label>
 
-              <label className="flex items-center gap-3 p-4 rounded-2xl neo-inset bg-[#e2e4ea] cursor-pointer">
+              <label className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100/55 transition-all">
                 <input
                   type="checkbox"
                   name="risk_alerts"
@@ -345,7 +345,7 @@ export function SettingsPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs neo-raised transition-all flex items-center gap-2"
+                className="px-6 py-3 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-2"
               >
                 <Save className="w-4 h-4 text-white" />
                 {loading ? 'Saving...' : 'Save Preferences'}
@@ -356,7 +356,7 @@ export function SettingsPage() {
       </div>
 
       {/* Danger Zone */}
-      <div className="bg-red-500/5 border border-red-500/20 rounded-3xl p-8 max-w-2xl neo-raised">
+      <div className="bg-red-50/50 border border-red-100 rounded-2xl p-8 max-w-2xl shadow-sm">
         <h3 className="text-base font-bold text-red-600 mb-2 font-headline uppercase tracking-wider">Danger Zone</h3>
         <p className="text-xs text-on-surface-variant mb-6">Logging out will invalidate your session on this browser.</p>
         <button

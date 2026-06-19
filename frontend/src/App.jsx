@@ -20,7 +20,7 @@ import AboutProjectPage from './pages/AboutProjectPage';
 // Internal App Layout (Sidebar + Navbar + Content wrapper)
 function AppLayout() {
   return (
-    <div className="flex h-screen bg-[#e8eaf0] overflow-hidden">
+    <div className="flex h-screen bg-white overflow-hidden">
       {/* Sidebar */}
       <Sidebar />
 

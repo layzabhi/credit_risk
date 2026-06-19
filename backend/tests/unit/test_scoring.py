@@ -14,7 +14,7 @@ class DummyModel:
     """Mock ML classifier model."""
     def __init__(self):
         self.name = "dummy_ensemble"
-        self.version = "2.0.0"
+        self.version = "1.0"
         
     def predict_proba(self, X):
         # Returns [P(no default), P(default)]
@@ -64,7 +64,7 @@ def test_scoring_service_single_applicant(sample_request):
     assert response.risk_rating == RiskRating.LOW  # Prob 0.20 < 0.25 is LOW
     assert response.default_probability == pytest.approx(0.20)
     assert response.raw_probability == pytest.approx(0.20)
-    assert response.model_version == "2.0.0"
+    assert response.model_version == "1.0"
     assert response.model_name == "dummy_ensemble"
     assert len(response.explanations.top_features) == 1
     assert response.explanations.top_features[0].name == "credit_score"

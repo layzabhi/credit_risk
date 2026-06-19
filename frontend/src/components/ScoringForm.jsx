@@ -112,7 +112,7 @@ const ScoringForm = ({ onScoreComplete }) => {
     try {
       const response = await axios.post('/api/v1/score', formData);
       if (onScoreComplete) {
-        onScoreComplete(response.data);
+        onScoreComplete({ ...formData, ...response.data });
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to score applicant';

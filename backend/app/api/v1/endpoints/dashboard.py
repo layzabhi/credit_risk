@@ -86,7 +86,8 @@ async def get_recent_scores(db: Session = Depends(get_db)) -> List[Dict[str, Any
     """Get the most recent 10 scoring requests for the dashboard table."""
     try:
         recent_requests = (
-            db.query(ScoringRequest)
+            db.query(ScoringRequest, Applicant)
+            .join(Applicant, ScoringRequest.applicant_id == Applicant.applicant_id)
             .order_by(ScoringRequest.created_at.desc())
             .limit(10)
             .all()
@@ -100,8 +101,11 @@ async def get_recent_scores(db: Session = Depends(get_db)) -> List[Dict[str, Any
                 "created_at": req.created_at.isoformat() if req.created_at else None,
                 "explanations": req.explanations,
                 "audit_trail": req.audit_trail,
+                "credit_score": app.credit_score,
+                "income": app.income,
+                "debt_to_income_ratio": app.debt_to_income_ratio,
             }
-            for req in recent_requests
+            for req, app in recent_requests
         ]
     except Exception as e:
         logger.error(f"Failed to fetch recent scores: {e}", exc_info=True)
@@ -258,7 +262,7 @@ async def seed_dashboard_data(db: Session = Depends(get_db)) -> Dict[str, Any]:
                 applicant_id=app_id,
                 loan_amount=template["loan_amount"],
                 loan_purpose=template["loan_purpose"],
-                model_version="xgboost_v2.0",
+                model_version="xgboost_v1.0",
                 model_name="xgboost",
                 risk_rating=template["risk_rating"],
                 default_probability=template["default_probability"],

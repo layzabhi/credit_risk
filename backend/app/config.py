@@ -13,7 +13,7 @@ class Settings:
     
     # Application
     APP_NAME: str = "Credit Risk Assessment API"
-    APP_VERSION: str = "2.0.0"
+    APP_VERSION: str = "1.0"
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
     
     # Server

@@ -16,5 +16,5 @@ async def get_health_status(db: Session = Depends(get_db)):
     return {
         "status": "healthy" if db_ok else "degraded",
         "database": "connected" if db_ok else "disconnected",
-        "api_version": "2.0.0",
+        "api_version": "1.0",
     }

@@ -160,7 +160,7 @@ class ModelLoader:
                         with open(metadata_path, "r") as f:
                             self.metadata[model_name] = json.load(f)
                     else:
-                        self.metadata[model_name] = {"name": model_name, "version": "1.0.0"}
+                        self.metadata[model_name] = {"name": model_name, "version": "1.0"}
                         
                     if feature_names_path.exists() and feature_names_path.stat().st_size > 0:
                         with open(feature_names_path, "r") as f:

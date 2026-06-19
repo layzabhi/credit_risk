@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Credit Risk Assessment API",
     description="AI-powered credit risk scoring and portfolio management system",
-    version="2.0.0",
+    version="1.0",
     lifespan=lifespan,
 )
 
@@ -172,7 +172,7 @@ async def health_check():
     health_status = {
         "status": "healthy",
         "models_loaded": model_loader is not None and len(model_loader.models) > 0,
-        "api_version": "2.0.0",
+        "api_version": "1.0",
     }
     
     # Check database connectivity
@@ -198,7 +198,7 @@ async def root():
     """Root endpoint with API documentation link."""
     return {
         "name": "Credit Risk Assessment API",
-        "version": "2.0.0",
+        "version": "1.0",
         "documentation": "/docs",
         "status": "running",
     }

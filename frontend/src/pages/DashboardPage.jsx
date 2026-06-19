@@ -7,79 +7,11 @@ import {
 } from 'recharts';
 import {
   TrendingUp, Users, CheckCircle2, AlertTriangle,
-  Loader2, Search, PlusCircle, ArrowUpDown,
-  X, Sparkles, Activity, Cpu, Clock, ShieldCheck, Database
+  Loader2, Search, ArrowUpDown,
+  Activity, Cpu, Clock, ShieldCheck, Database
 } from 'lucide-react';
 
-// Preset templates for sandbox scoring
-const PRESET_TEMPLATES = [
-  {
-    name: 'Prime Client (Low Risk)',
-    description: 'High income, excellent credit history, and minimal debt.',
-    data: {
-      applicant_id: '', // Will be generated dynamically
-      age: 42,
-      gender: 'Female',
-      education_level: 'PhD',
-      marital_status: 'Married',
-      income: 145000,
-      credit_score: 810,
-      loan_amount: 35000,
-      loan_purpose: 'Home',
-      employment_status: 'Employed',
-      years_at_current_job: 10,
-      payment_history: 'Good',
-      debt_to_income_ratio: 0.09,
-      assets_value: 620000,
-      number_of_dependents: 1,
-      previous_defaults: 0
-    }
-  },
-  {
-    name: 'Subprime Client (Medium Risk)',
-    description: 'Average income and fair credit score, with some active debt.',
-    data: {
-      applicant_id: '',
-      age: 30,
-      gender: 'Male',
-      education_level: 'Bachelor',
-      marital_status: 'Single',
-      income: 65000,
-      credit_score: 670,
-      loan_amount: 22000,
-      loan_purpose: 'Personal',
-      employment_status: 'Employed',
-      years_at_current_job: 4,
-      payment_history: 'Fair',
-      debt_to_income_ratio: 0.31,
-      assets_value: 40000,
-      number_of_dependents: 0,
-      previous_defaults: 0
-    }
-  },
-  {
-    name: 'High Risk Client (Default Risk)',
-    description: 'Low income, poor credit score, high DTI, and past defaults.',
-    data: {
-      applicant_id: '',
-      age: 24,
-      gender: 'Male',
-      education_level: 'High School',
-      marital_status: 'Single',
-      income: 26000,
-      credit_score: 530,
-      loan_amount: 14000,
-      loan_purpose: 'Personal',
-      employment_status: 'Unemployed',
-      years_at_current_job: 0,
-      payment_history: 'Poor',
-      debt_to_income_ratio: 0.52,
-      assets_value: 4000,
-      number_of_dependents: 2,
-      previous_defaults: 2
-    }
-  }
-];
+
 
 export function DashboardPage() {
   const { get, post } = useApi();
@@ -107,15 +39,7 @@ export function DashboardPage() {
 
   // Inspector & Modal states
   const [selectedAssessment, setSelectedAssessment] = useState(null);
-  const [quickScorerOpen, setQuickScorerOpen] = useState(false);
   const [seedingLoading, setSeedingLoading] = useState(false);
-
-  // Quick Scorer Form details
-  const [selectedTemplate, setSelectedTemplate] = useState(0);
-  const [quickScorerData, setQuickScorerData] = useState(null);
-  const [quickScorerLoading, setQuickScorerLoading] = useState(false);
-  const [quickScorerResult, setQuickScorerResult] = useState(null);
-  const [quickScorerError, setQuickScorerError] = useState(null);
 
   // Load dashboard data from backend
   const loadDashboard = useCallback(async (isSilent = false) => {
@@ -192,37 +116,7 @@ export function DashboardPage() {
     loadDashboard();
   }, [loadDashboard]);
 
-  // Initialize Quick Scorer Form with Template Data
-  useEffect(() => {
-    if (quickScorerOpen) {
-      const template = PRESET_TEMPLATES[selectedTemplate];
-      setQuickScorerData({
-        ...template.data,
-        applicant_id: `APP-SEED-${Date.now().toString().slice(-4)}`
-      });
-      setQuickScorerResult(null);
-      setQuickScorerError(null);
-    }
-  }, [quickScorerOpen, selectedTemplate]);
 
-  // Handle Quick Scorer Submission
-  const handleQuickScoreSubmit = async (e) => {
-    e.preventDefault();
-    setQuickScorerLoading(true);
-    setQuickScorerError(null);
-    setQuickScorerResult(null);
-
-    try {
-      const result = await post('/v1/score', quickScorerData);
-      setQuickScorerResult(result);
-      loadDashboard(true);
-    } catch (err) {
-      console.error('Quick assessment failed:', err);
-      setQuickScorerError(err.message || 'Scoring request validation failed.');
-    } finally {
-      setQuickScorerLoading(false);
-    }
-  };
 
   const CHART_COLORS = {
     low: '#10b981',
@@ -326,14 +220,6 @@ export function DashboardPage() {
                 <Database className="w-4 h-4 text-white" />
               )}
               {seedingLoading ? 'Generating Sandbox Data...' : 'Seed Sample Assessment Data'}
-            </button>
-
-            <button
-              onClick={() => setQuickScorerOpen(true)}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
-            >
-              <PlusCircle className="w-4 h-4 text-indigo-600" />
-              Perform Quick Scoring
             </button>
           </div>
         </div>
@@ -620,22 +506,13 @@ export function DashboardPage() {
                       className={`px-3 py-1 rounded capitalize transition-all ${
                         selectedRiskFilter === filter 
                           ? 'text-indigo-600 bg-white shadow-sm font-bold' 
-                          : 'text-slate-600 hover:text-indigo-600'
+                          : 'text-slate-650 hover:text-indigo-600'
                       }`}
                     >
                       {filter}
                     </button>
                   ))}
                 </div>
-
-                {/* Run Assessment Quick Scorer Button */}
-                <button
-                  onClick={() => setQuickScorerOpen(true)}
-                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-700 transition-colors shadow-sm"
-                >
-                  <PlusCircle className="w-3.5 h-3.5 text-white" />
-                  Assess Risk
-                </button>
               </div>
             </div>
 
@@ -835,220 +712,6 @@ export function DashboardPage() {
         </div>
       )}
 
-      {/* Modal Drawer: Quick Score Calculator */}
-      {quickScorerOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-scaleUp">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 p-5">
-              <div className="flex items-center gap-2.5">
-                <Sparkles className="w-5 h-5 text-indigo-600 animate-pulse" />
-                <div>
-                  <h3 className="text-base font-bold text-slate-850">RiskLens Sandbox Evaluator</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Mock single credit scoring and evaluate predictions live.</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setQuickScorerOpen(false)}
-                className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-800 transition-all focus:outline-none"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar grid grid-cols-1 lg:grid-cols-3 gap-6 bg-slate-50/30">
-              {/* Presets Column (Left) */}
-              <div className="lg:col-span-1 flex flex-col gap-4">
-                <h4 className="text-xs text-slate-500 font-bold uppercase tracking-wider">Select Profile Template</h4>
-                {PRESET_TEMPLATES.map((tpl, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setSelectedTemplate(idx)}
-                    className={`text-left p-4 rounded-2xl border transition-all ${
-                      selectedTemplate === idx 
-                        ? 'bg-white border-indigo-500 shadow-sm font-semibold' 
-                        : 'bg-white border-slate-200 hover:border-slate-350 hover:scale-102'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-slate-800">{tpl.name}</span>
-                      {selectedTemplate === idx && <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>}
-                    </div>
-                    <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">{tpl.description}</p>
-                  </button>
-                ))}
-
-                {/* Scorer result box */}
-                {quickScorerResult && (
-                  <div
-                    className="mt-4 p-5 rounded-2xl border border-dashed text-center flex flex-col items-center justify-center gap-3 animate-fadeIn"
-                    style={{
-                      borderColor: quickScorerResult.risk_rating === 'low' ? 'rgba(16, 185, 129, 0.4)' : quickScorerResult.risk_rating === 'medium' ? 'rgba(245, 158, 11, 0.4)' : 'rgba(239, 68, 68, 0.4)',
-                      backgroundColor: quickScorerResult.risk_rating === 'low' ? 'rgba(16, 185, 129, 0.05)' : quickScorerResult.risk_rating === 'medium' ? 'rgba(245, 158, 11, 0.05)' : 'rgba(239, 68, 68, 0.05)'
-                    }}
-                  >
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Assessment Outcome</p>
-                    <span
-                      className="px-3.5 py-1 rounded-full text-[10px] font-black uppercase font-mono tracking-wider border bg-white shadow-sm"
-                      style={{
-                        borderColor: quickScorerResult.risk_rating === 'low' ? 'rgba(16, 185, 129, 0.2)' : quickScorerResult.risk_rating === 'medium' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                        color: quickScorerResult.risk_rating === 'low' ? CHART_COLORS.low : quickScorerResult.risk_rating === 'medium' ? CHART_COLORS.medium : CHART_COLORS.high
-                      }}
-                    >
-                      {quickScorerResult.risk_rating} Risk
-                    </span>
-                    <div>
-                      <p className="text-2xl font-extrabold text-slate-800 font-mono">
-                        {(quickScorerResult.default_probability * 100).toFixed(2)}%
-                      </p>
-                      <p className="text-[9px] text-slate-400 mt-0.5">Probability of Default</p>
-                    </div>
-                  </div>
-                )}
-
-                {quickScorerError && (
-                  <div className="mt-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex gap-2">
-                    <AlertTriangle className="w-4.5 h-4.5 text-red-500 flex-shrink-0" />
-                    <p>{quickScorerError}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Form Input Columns (Middle & Right) */}
-              {quickScorerData && (
-                <form onSubmit={handleQuickScoreSubmit} className="lg:col-span-2 flex flex-col gap-5 border-t lg:border-t-0 lg:border-l border-slate-200 lg:pl-6 pt-5 lg:pt-0">
-                  <h4 className="text-xs text-slate-500 font-bold uppercase tracking-wider">Applicant Parameters</h4>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Applicant ID */}
-                    <div>
-                      <label className="block text-[10px] text-slate-400 font-bold mb-1">Applicant ID</label>
-                      <input
-                        type="text"
-                        value={quickScorerData.applicant_id}
-                        onChange={(e) => setQuickScorerData({ ...quickScorerData, applicant_id: e.target.value })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-mono"
-                        required
-                      />
-                    </div>
-
-                    {/* Age */}
-                    <div>
-                      <label className="block text-[10px] text-slate-400 font-bold mb-1">Age</label>
-                      <input
-                        type="number"
-                        value={quickScorerData.age}
-                        onChange={(e) => setQuickScorerData({ ...quickScorerData, age: parseInt(e.target.value) || 18 })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-mono"
-                        min={18}
-                        max={100}
-                        required
-                      />
-                    </div>
-
-                    {/* Credit Score */}
-                    <div>
-                      <label className="block text-[10px] text-slate-400 font-bold mb-1">FICO Credit Score (300-850)</label>
-                      <input
-                        type="number"
-                        value={quickScorerData.credit_score}
-                        onChange={(e) => setQuickScorerData({ ...quickScorerData, credit_score: parseInt(e.target.value) || 300 })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-mono"
-                        min={300}
-                        max={850}
-                        required
-                      />
-                    </div>
-
-                    {/* Income */}
-                    <div>
-                      <label className="block text-[10px] text-slate-400 font-bold mb-1">Annual Income ($)</label>
-                      <input
-                        type="number"
-                        value={quickScorerData.income}
-                        onChange={(e) => setQuickScorerData({ ...quickScorerData, income: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-mono"
-                        min={0}
-                        required
-                      />
-                    </div>
-
-                    {/* Loan Amount */}
-                    <div>
-                      <label className="block text-[10px] text-slate-400 font-bold mb-1">Loan Amount Requested ($)</label>
-                      <input
-                        type="number"
-                        value={quickScorerData.loan_amount}
-                        onChange={(e) => setQuickScorerData({ ...quickScorerData, loan_amount: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-mono"
-                        min={0}
-                        required
-                      />
-                    </div>
-
-                    {/* Debt-to-income Ratio */}
-                    <div>
-                      <label className="block text-[10px] text-slate-400 font-bold mb-1">Debt-to-Income (DTI) Ratio</label>
-                      <input
-                        type="number"
-                        value={quickScorerData.debt_to_income_ratio}
-                        onChange={(e) => setQuickScorerData({ ...quickScorerData, debt_to_income_ratio: parseFloat(e.target.value) || 0.0 })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-mono"
-                        min={0.0}
-                        max={1.0}
-                        step={0.01}
-                        required
-                      />
-                    </div>
-
-                    {/* Previous Defaults */}
-                    <div>
-                      <label className="block text-[10px] text-slate-400 font-bold mb-1">Previous Defaults</label>
-                      <input
-                        type="number"
-                        value={quickScorerData.previous_defaults}
-                        onChange={(e) => setQuickScorerData({ ...quickScorerData, previous_defaults: parseInt(e.target.value) || 0 })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-mono"
-                        min={0}
-                        required
-                      />
-                    </div>
-
-                    {/* Employment Status */}
-                    <div>
-                      <label className="block text-[10px] text-slate-400 font-bold mb-1">Employment Status</label>
-                      <select
-                        value={quickScorerData.employment_status}
-                        onChange={(e) => setQuickScorerData({ ...quickScorerData, employment_status: e.target.value })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      >
-                        <option value="Employed">Employed</option>
-                        <option value="Self-employed">Self-employed</option>
-                        <option value="Unemployed">Unemployed</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={quickScorerLoading}
-                    className="w-full py-3 mt-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    {quickScorerLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="w-4 h-4 text-white" />
-                    )}
-                    {quickScorerLoading ? 'Predicting Live Risk...' : 'Run Risk Prediction'}
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

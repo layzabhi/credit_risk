@@ -1,6 +1,6 @@
 {
   "name": "xgboost",
-  "version": "2.0.0",
+  "version": "1.0",
   "framework": "xgboost",
   "model_type": "XGBClassifier",
   "training_samples": 17500,

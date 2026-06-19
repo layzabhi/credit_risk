@@ -22,7 +22,7 @@ export function ModelPerformancePage() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl neo-raised text-primary font-bold transition-all hover:scale-102 active:scale-98 bg-[#e8eaf0]">
+          <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold transition-all hover:bg-slate-50 hover:scale-102 active:scale-98 bg-white shadow-sm">
             <Download className="w-4 h-4" />
             <span>Report</span>
           </button>
@@ -32,61 +32,61 @@ export function ModelPerformancePage() {
       {/* Bento Grid - Key Metrics */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Accuracy */}
-        <div className="p-6 rounded-3xl neo-raised bg-background">
+        <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2.5 rounded-xl neo-inset bg-[#e8eaf0]">
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
               <CheckCircle2 className="w-5 h-5 text-primary" />
             </div>
             <span className="text-[10px] font-bold text-green-600 bg-green-100 px-2.5 py-1 rounded-full font-mono">+1.2%</span>
           </div>
           <p className="text-on-surface-variant text-sm font-medium">Accuracy</p>
           <h4 className="text-3xl font-extrabold text-on-surface mt-1 font-mono">87.7%</h4>
-          <div className="w-full h-1.5 bg-surface-container rounded-full mt-4 overflow-hidden neo-inset p-[1px]">
+          <div className="w-full h-1.5 bg-slate-100 rounded-full mt-4 overflow-hidden border border-slate-200 p-[1px]">
             <div className="h-full bg-primary rounded-full" style={{ width: '87.7%' }}></div>
           </div>
         </div>
 
         {/* Precision */}
-        <div className="p-6 rounded-3xl neo-raised bg-background">
+        <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2.5 rounded-xl neo-inset bg-[#e8eaf0]">
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
               <Target className="w-5 h-5 text-tertiary" />
             </div>
             <span className="text-[10px] font-bold text-on-surface-variant bg-[#e2e4ea] px-2.5 py-1 rounded-full font-mono">Stable</span>
           </div>
           <p className="text-on-surface-variant text-sm font-medium">Precision</p>
           <h4 className="text-3xl font-extrabold text-on-surface mt-1 font-mono">35.7%</h4>
-          <div className="w-full h-1.5 bg-surface-container rounded-full mt-4 overflow-hidden neo-inset p-[1px]">
+          <div className="w-full h-1.5 bg-slate-100 rounded-full mt-4 overflow-hidden border border-slate-200 p-[1px]">
             <div className="h-full bg-tertiary rounded-full" style={{ width: '35.7%' }}></div>
           </div>
         </div>
 
         {/* Recall */}
-        <div className="p-6 rounded-3xl neo-raised bg-background">
+        <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2.5 rounded-xl neo-inset bg-[#e8eaf0]">
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
               <RefreshCw className="w-5 h-5 text-indigo-400" />
             </div>
             <span className="text-[10px] font-bold text-red-500 bg-red-100 px-2.5 py-1 rounded-full font-mono">-0.4%</span>
           </div>
           <p className="text-on-surface-variant text-sm font-medium">Recall</p>
           <h4 className="text-3xl font-extrabold text-on-surface mt-1 font-mono">75.0%</h4>
-          <div className="w-full h-1.5 bg-surface-container rounded-full mt-4 overflow-hidden neo-inset p-[1px]">
+          <div className="w-full h-1.5 bg-slate-100 rounded-full mt-4 overflow-hidden border border-slate-200 p-[1px]">
             <div className="h-full bg-indigo-400 rounded-full" style={{ width: '75.0%' }}></div>
           </div>
         </div>
 
         {/* ROC-AUC */}
-        <div className="p-6 rounded-3xl neo-raised bg-background">
+        <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2.5 rounded-xl neo-inset bg-[#e8eaf0]">
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
               <AreaChart className="w-5 h-5 text-secondary-500" />
             </div>
             <span className="text-[10px] font-bold text-green-600 bg-green-100 px-2.5 py-1 rounded-full font-mono">+2.8%</span>
           </div>
           <p className="text-on-surface-variant text-sm font-medium">ROC-AUC</p>
           <h4 className="text-3xl font-extrabold text-on-surface mt-1 font-mono">0.895</h4>
-          <div className="w-full h-1.5 bg-surface-container rounded-full mt-4 overflow-hidden neo-inset p-[1px]">
+          <div className="w-full h-1.5 bg-slate-100 rounded-full mt-4 overflow-hidden border border-slate-200 p-[1px]">
             <div className="h-full bg-[#64748b] rounded-full" style={{ width: '89.5%' }}></div>
           </div>
         </div>
@@ -95,7 +95,7 @@ export function ModelPerformancePage() {
       {/* Middle Section: Drift Chart & Confusion Matrix */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Performance Drift Line Chart */}
-        <div className="lg:col-span-2 p-8 rounded-[2rem] neo-raised bg-background relative overflow-hidden">
+        <div className="lg:col-span-2 p-8 rounded-2xl border border-slate-100 shadow-sm bg-white relative overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div>
               <h5 className="text-xl font-bold text-on-surface">Performance Stability</h5>
@@ -153,27 +153,27 @@ export function ModelPerformancePage() {
         </div>
 
         {/* Confusion Matrix */}
-        <div className="p-8 rounded-[2rem] neo-raised bg-background">
+        <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white">
           <h5 className="text-xl font-bold text-on-surface mb-1">Confusion Matrix</h5>
           <p className="text-xs text-on-surface-variant mb-6">True vs Predicted labels</p>
           <div className="grid grid-cols-2 gap-4">
             {/* Cell TP */}
-            <div className="aspect-square flex flex-col items-center justify-center rounded-2xl neo-inset bg-primary/10 border border-primary/20">
+            <div className="aspect-square flex flex-col items-center justify-center rounded-2xl bg-indigo-50/50 border border-indigo-100">
               <span className="text-primary font-bold text-2xl font-mono">4,281</span>
               <span className="text-[9px] font-bold text-primary uppercase mt-1">True Positive</span>
             </div>
             {/* Cell FP */}
-            <div className="aspect-square flex flex-col items-center justify-center rounded-2xl neo-raised bg-[#e8eaf0] border border-white/40">
+            <div className="aspect-square flex flex-col items-center justify-center rounded-2xl bg-slate-50 border border-slate-200">
               <span className="text-on-surface font-bold text-2xl font-mono">142</span>
               <span className="text-[9px] font-bold text-on-surface-variant uppercase mt-1">False Positive</span>
             </div>
             {/* Cell FN */}
-            <div className="aspect-square flex flex-col items-center justify-center rounded-2xl neo-raised bg-[#e8eaf0] border border-white/40">
+            <div className="aspect-square flex flex-col items-center justify-center rounded-2xl bg-slate-50 border border-slate-200">
               <span className="text-on-surface font-bold text-2xl font-mono">319</span>
               <span className="text-[9px] font-bold text-on-surface-variant uppercase mt-1">False Negative</span>
             </div>
             {/* Cell TN */}
-            <div className="aspect-square flex flex-col items-center justify-center rounded-2xl neo-inset bg-tertiary/10 border border-tertiary/20">
+            <div className="aspect-square flex flex-col items-center justify-center rounded-2xl bg-emerald-50/50 border border-emerald-100">
               <span className="text-tertiary font-bold text-2xl font-mono">12,894</span>
               <span className="text-[9px] font-bold text-tertiary uppercase mt-1">True Negative</span>
             </div>
@@ -195,9 +195,9 @@ export function ModelPerformancePage() {
       <section className="flex flex-col xl:flex-row gap-8">
         {/* Data Quality / Sensitivity */}
         <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-8 rounded-[2rem] neo-raised bg-background">
+          <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl neo-inset flex items-center justify-center bg-[#e8eaf0]">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 border border-slate-100">
                 <AlertTriangle className="w-6 h-6 text-primary" />
               </div>
               <div>
@@ -211,7 +211,7 @@ export function ModelPerformancePage() {
                   <span>Debt-to-Income</span>
                   <span className="text-primary font-mono">0.82 Impact</span>
                 </div>
-                <div className="w-full h-2 rounded-full neo-inset overflow-hidden p-[1px]">
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                   <div className="h-full bg-primary rounded-full" style={{ width: '82%' }}></div>
                 </div>
               </div>
@@ -221,7 +221,7 @@ export function ModelPerformancePage() {
                   <span>Payment History</span>
                   <span className="text-primary font-mono">0.64 Impact</span>
                 </div>
-                <div className="w-full h-2 rounded-full neo-inset overflow-hidden p-[1px]">
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                   <div className="h-full bg-primary rounded-full" style={{ width: '64%' }}></div>
                 </div>
               </div>
@@ -231,14 +231,14 @@ export function ModelPerformancePage() {
                   <span>Credit Utilization</span>
                   <span className="text-primary font-mono">0.45 Impact</span>
                 </div>
-                <div className="w-full h-2 rounded-full neo-inset overflow-hidden p-[1px]">
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-[1px]">
                   <div className="h-full bg-primary rounded-full" style={{ width: '45%' }}></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="p-8 rounded-[2rem] neo-raised bg-background flex flex-col justify-center">
+          <div className="p-8 rounded-2xl border border-slate-100 shadow-sm bg-white flex flex-col justify-center">
             <div className="mb-4">
               <h6 className="text-base font-bold text-on-surface">Inference Speed</h6>
               <p className="text-xs text-on-surface-variant">Global p99 latency in production environment</p>
@@ -252,7 +252,7 @@ export function ModelPerformancePage() {
               12% faster latency than previous release
             </p>
             <div className="mt-6 flex gap-2">
-              <div className="h-10 w-full neo-inset rounded-xl flex items-center justify-center bg-[#e2e4ea] relative">
+              <div className="h-10 w-full rounded-xl flex items-center justify-center bg-slate-100 border border-slate-200 relative">
                 <div className="w-2/3 h-1/2 bg-primary/20 rounded-md"></div>
               </div>
             </div>
@@ -260,7 +260,7 @@ export function ModelPerformancePage() {
         </div>
 
         {/* Snap image decoration */}
-        <div className="xl:w-80 h-64 xl:h-auto rounded-[2rem] neo-raised overflow-hidden relative group shrink-0">
+        <div className="xl:w-80 h-64 xl:h-auto rounded-2xl border border-slate-100 shadow-sm bg-white overflow-hidden relative group shrink-0">
           <img
             alt="Model architecture visualization"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"

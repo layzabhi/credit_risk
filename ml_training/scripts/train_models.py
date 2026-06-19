@@ -1001,15 +1001,27 @@ def main():
     
     # Save models and metrics
     logger.info("Saving artifacts...")
+    models_dir = Path(config['output']['models_dir'])
+    extra_models_dir = Path(__file__).resolve().parents[1] / "models"
+    extra_models_dir.mkdir(parents=True, exist_ok=True)
+    
     for model_name, model in trainer.models.items():
-        filepath = Path(config['output']['models_dir']) / f"{model_name}.pkl"
+        filepath = models_dir / f"{model_name}.pkl"
         joblib.dump(model, filepath)
         logger.info(f"Saved {model_name} to {filepath}")
         
+        extra_filepath = extra_models_dir / f"{model_name}.pkl"
+        joblib.dump(model, extra_filepath)
+        logger.info(f"Saved copy of {model_name} to {extra_filepath}")
+        
     if config['output'].get('save_preprocessing', True):
-        preprocessor_filepath = Path(config['output']['models_dir']) / "preprocessor.pkl"
+        preprocessor_filepath = models_dir / "preprocessor.pkl"
         joblib.dump(preprocessor, preprocessor_filepath)
         logger.info(f"Saved preprocessor to {preprocessor_filepath}")
+        
+        extra_prep_filepath = extra_models_dir / "preprocessor.pkl"
+        joblib.dump(preprocessor, extra_prep_filepath)
+        logger.info(f"Saved copy of preprocessor to {extra_prep_filepath}")
     
     # Save metrics summary
     metrics_summary = {
@@ -1020,10 +1032,16 @@ def main():
         for model_name, metrics in trainer.metrics.items()
     }
     
-    metrics_file = Path(config['output']['models_dir']) / "metrics.json"
+    metrics_file = models_dir / "metrics.json"
     with open(metrics_file, 'w') as f:
         json.dump(metrics_summary, f, indent=2)
     logger.info(f"Saved metrics to {metrics_file}")
+    
+    extra_metrics_file = extra_models_dir / "metrics.json"
+    with open(extra_metrics_file, 'w') as f:
+        json.dump(metrics_summary, f, indent=2)
+    logger.info(f"Saved copy of metrics to {extra_metrics_file}")
+
     
     # Run SHAP Explainability on the best model (XGBoost)
     if config.get('shap', {}).get('enabled', False):

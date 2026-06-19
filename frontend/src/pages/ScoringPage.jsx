@@ -4,16 +4,16 @@ import ScoringForm from '../components/ScoringForm';
 import ScoringResult from '../components/ScoringResult';
 import ExplainabilityPanel from '../components/ExplainabilityPanel';
 import { useApi } from '../hooks/useApi';
-import { 
-  HelpCircle, 
-  Activity, 
-  ChevronRight, 
-  History, 
-  CheckCircle2, 
-  AlertTriangle, 
-  AlertCircle, 
-  Sparkles, 
-  Loader2 
+import {
+  HelpCircle,
+  Activity,
+  ChevronRight,
+  History,
+  CheckCircle2,
+  AlertTriangle,
+  AlertCircle,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 
 export const normalizeScoreResult = (rawResult) => {
@@ -21,7 +21,7 @@ export const normalizeScoreResult = (rawResult) => {
 
   const risk_level = rawResult.risk_level || rawResult.risk_rating || 'low';
   const default_probability = rawResult.default_probability || 0.0;
-  
+
   const metrics = rawResult.metrics || {
     fico_score: rawResult.credit_score || 720,
     annual_income: rawResult.income || 75000,
@@ -161,7 +161,7 @@ export function ScoringPage() {
           {normalizedResult ? (
             <div className="space-y-6 animate-fadeIn">
               <ScoringResult result={normalizedResult} />
-              
+
               {showExplanations && (normalizedResult.feature_importance?.length > 0 || normalizedResult.shap_values?.length > 0) && (
                 <div className="bg-white border border-outline-variant rounded-xl shadow-sm p-6">
                   <h3 className="font-bold text-sm text-slate-800 mb-4 border-b border-slate-100 pb-3">Model Explanation</h3>
@@ -182,7 +182,7 @@ export function ScoringPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
                 <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg text-center">
                   <p className="text-3xs text-slate-400 font-bold uppercase">Accuracy</p>
-                  <p className="text-base font-extrabold text-slate-700 font-mono mt-0.5">94.2%</p>
+                  <p className="text-base font-extrabold text-slate-700 font-mono mt-0.5">87.7%</p>
                 </div>
                 <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg text-center">
                   <p className="text-3xs text-slate-400 font-bold uppercase">Model Type</p>
@@ -190,7 +190,7 @@ export function ScoringPage() {
                 </div>
                 <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg text-center">
                   <p className="text-3xs text-slate-400 font-bold uppercase">Features</p>
-                  <p className="text-base font-extrabold text-slate-700 font-mono mt-0.5">16 Core</p>
+                  <p className="text-base font-extrabold text-slate-700 font-mono mt-0.5">23 Core</p>
                 </div>
                 <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg text-center">
                   <p className="text-3xs text-slate-400 font-bold uppercase">Latency</p>
@@ -206,7 +206,7 @@ export function ScoringPage() {
           {/* Assessment Status Gauge Card */}
           <div className="bg-white border border-outline-variant rounded-xl shadow-sm p-6 text-center flex flex-col items-center justify-between min-h-[420px] relative overflow-hidden">
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 self-start">Assessment Status</h3>
-            
+
             {/* Gauge */}
             <div className="w-full my-4 flex flex-col items-center">
               <div className="relative h-24 w-48 mx-auto overflow-hidden">
@@ -217,8 +217,8 @@ export function ScoringPage() {
                 <div className="absolute top-0 left-0 w-full h-[200%] rounded-full border-[16px] border-transparent border-t-amber-400 rotate-[0deg]"></div>
                 <div className="absolute top-0 left-0 w-full h-[200%] rounded-full border-[16px] border-transparent border-r-emerald-500 border-t-emerald-500 -rotate-[45deg]"></div>
                 {/* Needle */}
-                <div 
-                  className="absolute bottom-0 left-1/2 w-1 h-16 bg-slate-800 origin-bottom rounded-full transition-transform duration-[1200ms]" 
+                <div
+                  className="absolute bottom-0 left-1/2 w-1 h-16 bg-slate-800 origin-bottom rounded-full transition-transform duration-[1200ms]"
                   style={{ transform: `translateX(-50%) rotate(${needleAngle}deg)` }}
                 ></div>
                 {/* Needle Cap */}
@@ -259,13 +259,12 @@ export function ScoringPage() {
               </div>
             ) : (
               <div className="space-y-4 flex flex-col items-center">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center border ${
-                  riskRatingLower === 'low' 
-                    ? 'bg-emerald-50 border-emerald-100 text-emerald-600' 
-                    : riskRatingLower === 'medium'
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center border ${riskRatingLower === 'low'
+                  ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                  : riskRatingLower === 'medium'
                     ? 'bg-amber-50 border-amber-100 text-amber-600'
                     : 'bg-red-50 border-red-100 text-red-600'
-                }`}>
+                  }`}>
                   {riskRatingLower === 'low' ? (
                     <CheckCircle2 className="w-6 h-6" />
                   ) : riskRatingLower === 'medium' ? (
@@ -275,13 +274,12 @@ export function ScoringPage() {
                   )}
                 </div>
                 <div>
-                  <h4 className={`font-extrabold text-base uppercase ${
-                    riskRatingLower === 'low' 
-                      ? 'text-emerald-600' 
-                      : riskRatingLower === 'medium'
+                  <h4 className={`font-extrabold text-base uppercase ${riskRatingLower === 'low'
+                    ? 'text-emerald-600'
+                    : riskRatingLower === 'medium'
                       ? 'text-amber-500'
                       : 'text-red-500'
-                  }`}>
+                    }`}>
                     {riskRatingLabel} Risk
                   </h4>
                   <p className="text-xs font-bold text-slate-400 mt-0.5">
@@ -291,7 +289,7 @@ export function ScoringPage() {
                 <p className="text-xs text-slate-505 max-w-[260px] leading-relaxed bg-slate-50 border border-slate-100 p-2.5 rounded-lg">
                   {normalizedResult.recommendation}
                 </p>
-                
+
                 {/* Evaluated Bullet Metrics */}
                 <div className="pt-2 w-full space-y-1.5 text-left text-2xs font-semibold text-slate-500">
                   <div className="flex items-center justify-between px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-md">
@@ -313,13 +311,12 @@ export function ScoringPage() {
                       <span className={`w-1.5 h-1.5 rounded-full ${riskRatingLower === 'low' ? 'bg-emerald-500' : riskRatingLower === 'medium' ? 'bg-amber-500' : 'bg-red-500'}`}></span>
                       <span>Decision Outcome</span>
                     </div>
-                    <span className={`font-bold uppercase ${
-                      riskRatingLower === 'low' 
-                        ? 'text-emerald-600' 
-                        : riskRatingLower === 'medium'
+                    <span className={`font-bold uppercase ${riskRatingLower === 'low'
+                      ? 'text-emerald-600'
+                      : riskRatingLower === 'medium'
                         ? 'text-amber-500'
                         : 'text-red-500'
-                    }`}>
+                      }`}>
                       {riskRatingLower === 'low' ? 'Approved' : riskRatingLower === 'medium' ? 'Refer' : 'Declined'}
                     </span>
                   </div>
@@ -332,7 +329,7 @@ export function ScoringPage() {
           <div className="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-outline-variant bg-slate-50/50 flex justify-between items-center">
               <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Recent Runs</span>
-              <button 
+              <button
                 onClick={() => fetchRecentRuns(true)}
                 disabled={recentRunsLoading}
                 className="text-slate-400 hover:text-primary transition-colors disabled:opacity-40"
@@ -340,7 +337,7 @@ export function ScoringPage() {
                 <History className={`w-4 h-4 ${recentRunsLoading ? 'animate-spin' : ''}`} />
               </button>
             </div>
-            
+
             {recentRunsLoading && recentRuns.length === 0 ? (
               <div className="p-8 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -356,12 +353,11 @@ export function ScoringPage() {
                   const runRisk = run.risk_level || run.risk_rating || 'low';
                   const runRiskLower = runRisk.toLowerCase();
                   return (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       onClick={() => handleRecentRunClick(run)}
-                      className={`px-6 py-3 flex items-center justify-between hover:bg-slate-50/50 transition-colors cursor-pointer ${
-                        scoreResult?.applicant_id === run.applicant_id ? 'bg-indigo-50/40' : ''
-                      }`}
+                      className={`px-6 py-3 flex items-center justify-between hover:bg-slate-50/50 transition-colors cursor-pointer ${scoreResult?.applicant_id === run.applicant_id ? 'bg-indigo-50/40' : ''
+                        }`}
                     >
                       <div>
                         <p className="text-xs font-bold text-slate-700 font-mono">{run.applicant_id}</p>
@@ -369,13 +365,12 @@ export function ScoringPage() {
                           {new Date(run.created_at || run.timestamp || run.scoring_timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
-                      <span className={`px-2 py-0.5 rounded text-3xs font-extrabold uppercase border ${
-                        runRiskLower === 'low' 
-                          ? 'bg-emerald-50 border-emerald-100 text-emerald-600' 
-                          : runRiskLower === 'medium'
+                      <span className={`px-2 py-0.5 rounded text-3xs font-extrabold uppercase border ${runRiskLower === 'low'
+                        ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                        : runRiskLower === 'medium'
                           ? 'bg-amber-50 border-amber-100 text-amber-600'
                           : 'bg-red-50 border-red-100 text-red-600'
-                      }`}>
+                        }`}>
                         {runRiskLower === 'low' ? 'Approved' : runRiskLower === 'medium' ? 'Manual' : 'Rejected'}
                       </span>
                     </div>
@@ -383,8 +378,8 @@ export function ScoringPage() {
                 })}
               </div>
             )}
-            
-            <button 
+
+            <button
               onClick={handleViewFullHistory}
               className="w-full py-2.5 text-primary hover:bg-slate-50 border-t border-slate-100 text-3xs font-bold uppercase tracking-wider transition-all"
             >

@@ -47,7 +47,7 @@ def main():
             
     metadata = {
         "name": "xgboost_ensemble",
-        "version": "2.0.0",
+        "version": "1.0",
         "framework": "scikit-learn",
         "model_type": "StackingClassifier",
         "training_samples": 17500,  # 70% of 25k sample size

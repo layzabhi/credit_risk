@@ -287,7 +287,7 @@ class ScoringService:
         """Extract metadata from model."""
         return {
             "name": getattr(self.model, "name", "ensemble_model"),
-            "version": getattr(self.model, "version", "1.0.0"),
+            "version": getattr(self.model, "version", "1.0"),
             "type": type(self.model).__name__,
         }
     

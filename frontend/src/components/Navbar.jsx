@@ -8,7 +8,20 @@ export function Navbar() {
   const location = useLocation();
   const { user, logout, isAuthenticated } = useAuth();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark' || 
+           (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  });
+
+  React.useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
 
   const handleLogout = async () => {
     await logout();
