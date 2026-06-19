@@ -50,10 +50,15 @@ export function Navbar() {
     : 'Erika Collins';
     
   const profileRole = user?.role ? user.role : 'Super Admin';
-  
-  const profileAvatar = user?.avatar_url 
-    ? user.avatar_url 
-    : 'https://lh3.googleusercontent.com/aida-public/AB6AXuD1Wd-93wgoXC4k07ApnPQ45jcoyudQ9cKTE2JuYOk-In8vt_sSkWpM7cF4eK1rwsvt9bxpfJBju3v0VLfxlk477fq4ZQmAK3lvc9UgpSVDHlkiHJgA3R2HYaWmZrWWyXAwKXc_cKn_ODlidMPIvs4Acciry_F7ikJzQv-ZGpVDfGHZTGsJKk0HmcZiBDRzabX0FfsiyBwWKgBgYUym_c9wFvQIpAk8mKBpfwb4CwFYdaF1cL6Yiq2WNjc-BhRKC_QQsDtoUfdcgK0';
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name[0] ? name[0].toUpperCase() : 'U';
+  };
 
   return (
     <nav className="bg-transparent px-8 pt-6 pb-2 flex justify-between items-center z-10 shrink-0">
@@ -85,11 +90,17 @@ export function Navbar() {
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
               className="flex items-center gap-3 ml-2 cursor-pointer hover:opacity-90 transition-opacity focus:outline-none"
             >
-              <img 
-                alt={profileName} 
-                className="w-10 h-10 rounded-full object-cover border border-slate-200" 
-                src={profileAvatar} 
-              />
+              {user?.avatar_url ? (
+                <img 
+                  alt={profileName} 
+                  className="w-10 h-10 rounded-full object-cover border border-slate-200" 
+                  src={user.avatar_url} 
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full border border-slate-200 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm shrink-0">
+                  {getInitials(profileName)}
+                </div>
+              )}
               <div className="hidden lg:block text-left">
                 <p className="text-sm font-bold text-slate-800 leading-none">{profileName}</p>
                 <p className="text-xs text-slate-400 mt-1">{profileRole}</p>
