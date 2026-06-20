@@ -80,7 +80,7 @@ export function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -150,9 +150,8 @@ export function RegisterPage() {
                 onChange={handleChange}
                 placeholder="John"
                 disabled={isSubmitting}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                  validationErrors.firstName ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed ${validationErrors.firstName ? 'border-red-500' : 'border-gray-300'
+                  }`}
               />
               {validationErrors.firstName && (
                 <p className="text-sm text-red-600 mt-1">{validationErrors.firstName}</p>
@@ -172,9 +171,8 @@ export function RegisterPage() {
                 onChange={handleChange}
                 placeholder="Doe"
                 disabled={isSubmitting}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                  validationErrors.lastName ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed ${validationErrors.lastName ? 'border-red-500' : 'border-gray-300'
+                  }`}
               />
               {validationErrors.lastName && (
                 <p className="text-sm text-red-600 mt-1">{validationErrors.lastName}</p>
@@ -194,9 +192,8 @@ export function RegisterPage() {
                 onChange={handleChange}
                 placeholder="you@example.com"
                 disabled={isSubmitting}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                  validationErrors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed ${validationErrors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 autoComplete="email"
               />
               {validationErrors.email && (
@@ -218,9 +215,8 @@ export function RegisterPage() {
                   onChange={handleChange}
                   placeholder="••••••••"
                   disabled={isSubmitting}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed pr-10 ${
-                    validationErrors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed pr-10 ${validationErrors.password ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   autoComplete="new-password"
                 />
                 <button
@@ -258,9 +254,8 @@ export function RegisterPage() {
                   onChange={handleChange}
                   placeholder="••••••••"
                   disabled={isSubmitting}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed pr-10 ${
-                    validationErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed pr-10 ${validationErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   autoComplete="new-password"
                 />
                 <button
@@ -335,7 +330,7 @@ export function RegisterPage() {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-600 mt-6">
-          © 2024 RiskLens Assessment. All rights reserved.
+          © 2026 RiskLens Assessment. All rights reserved.
         </p>
       </div>
     </div>

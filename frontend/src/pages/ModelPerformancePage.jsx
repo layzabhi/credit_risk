@@ -21,12 +21,7 @@ export function ModelPerformancePage() {
             Real-time health telemetry
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold transition-all hover:bg-slate-50 hover:scale-102 active:scale-98 bg-white shadow-sm">
-            <Download className="w-4 h-4" />
-            <span>Report</span>
-          </button>
-        </div>
+
       </div>
 
       {/* Bento Grid - Key Metrics */}

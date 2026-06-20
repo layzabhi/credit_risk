@@ -93,23 +93,6 @@ def get_db_context() -> Generator[Session, None, None]:
         db.close()
 
 
-def init_db() -> None:
-    """Initialize database tables."""
-    from app.models.database import Base
-    
-    logger.info("Initializing database tables...")
-    Base.metadata.create_all(bind=engine)
-    logger.info("Database tables created")
-
-
-def drop_db() -> None:
-    """Drop all database tables (dangerous - use only for testing)."""
-    from app.models.database import Base
-    
-    logger.warning("⚠️  Dropping all database tables...")
-    Base.metadata.drop_all(bind=engine)
-    logger.info("Database tables dropped")
-
 
 def health_check() -> bool:
     """Check database connectivity."""

@@ -150,12 +150,7 @@ class DataPreprocessor:
                 )
                 X_encoded[col] = le.transform(X_encoded[col])
         return X_encoded
-    
-    def _scale_numerical(self, X: pd.DataFrame, fit: bool = False) -> pd.DataFrame:
-        """Scale numerical features using fitted StandardScaler."""
-        # Handled inside fit and transform directly
-        return X
-    
+        
     def _engineer_features(self, X: pd.DataFrame) -> pd.DataFrame:
         """Create additional engineered features."""
         return add_engineered_features(X)
