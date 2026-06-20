@@ -8,7 +8,8 @@ import {
 import {
   TrendingUp, Users, CheckCircle2, AlertTriangle,
   Loader2, Search, ArrowUpDown,
-  Activity, Cpu, Clock, ShieldCheck, Database
+  Activity, Cpu, Clock, ShieldCheck, Database,
+  X, Sparkles
 } from 'lucide-react';
 
 

@@ -4,6 +4,7 @@ Provides SHAP-based feature importance and decision explanations.
 """
 
 import logging
+from datetime import datetime
 from typing import Dict, Any
 from uuid import uuid4
 
@@ -25,6 +26,25 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/explain", tags=["explainability"])
 
 
+def _resolve_scoring_request(db: Session, request_id: str) -> DbScoringRequest:
+    """Resolve a scoring request by either request_id or applicant_id."""
+    scoring_request = db.query(DbScoringRequest).filter(DbScoringRequest.request_id == request_id).first()
+    if not scoring_request:
+        # Fallback to checking by applicant_id, returning the latest scoring request
+        scoring_request = (
+            db.query(DbScoringRequest)
+            .filter(DbScoringRequest.applicant_id == request_id)
+            .order_by(DbScoringRequest.created_at.desc())
+            .first()
+        )
+    if not scoring_request:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Scoring request or applicant {request_id} not found"
+        )
+    return scoring_request
+
+
 @router.get(
     "/{request_id}",
     response_model=ExplanationData,
@@ -41,8 +61,12 @@ async def get_explanation(
 ) -> ExplanationData:
     """Get SHAP explanation for a specific scoring request."""
     try:
+        # Resolve scoring request (supports applicant_id fallback)
+        scoring_request = _resolve_scoring_request(db, request_id)
+        actual_request_id = scoring_request.request_id
+
         # Check cache
-        cached = db.query(DbExplanation).filter(DbExplanation.request_id == request_id).first()
+        cached = db.query(DbExplanation).filter(DbExplanation.request_id == actual_request_id).first()
         if cached:
             top_feats = [
                 FeatureImportance(
@@ -60,13 +84,6 @@ async def get_explanation(
             )
             
         # If not cached, re-compute
-        scoring_request = db.query(DbScoringRequest).filter(DbScoringRequest.request_id == request_id).first()
-        if not scoring_request:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Scoring request {request_id} not found"
-            )
-            
         applicant = db.query(Applicant).filter(Applicant.applicant_id == scoring_request.applicant_id).first()
         if not applicant:
             raise HTTPException(
@@ -111,7 +128,7 @@ async def get_explanation(
         # Cache
         db_explanation = DbExplanation(
             explanation_id=str(uuid4()),
-            request_id=request_id,
+            request_id=actual_request_id,
             shap_values=explanation_data.shap_values,
             feature_importance=[f.dict() for f in explanation_data.top_features],
             base_value=explanation_data.base_value,
@@ -144,15 +161,14 @@ async def get_waterfall_plot(
 ) -> dict:
     """Get SHAP waterfall plot data for visualization."""
     try:
-        scoring_request = db.query(DbScoringRequest).filter(DbScoringRequest.request_id == request_id).first()
-        if not scoring_request:
+        scoring_request = _resolve_scoring_request(db, request_id)
+        applicant = db.query(Applicant).filter(Applicant.applicant_id == scoring_request.applicant_id).first()
+        if not applicant:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Scoring request {request_id} not found"
+                detail=f"Applicant details not found for applicant {scoring_request.applicant_id}"
             )
             
-        applicant = db.query(Applicant).filter(Applicant.applicant_id == scoring_request.applicant_id).first()
-        
         from app.models.schemas import ScoringRequest as SchemaScoringRequest
         from app.models.enums import GenderEnum, EducationLevel, MaritalStatus, EmploymentStatus, LoanPurpose, PaymentHistory
         
@@ -206,15 +222,14 @@ async def get_force_plot(
 ) -> dict:
     """Get SHAP force plot data."""
     try:
-        scoring_request = db.query(DbScoringRequest).filter(DbScoringRequest.request_id == request_id).first()
-        if not scoring_request:
+        scoring_request = _resolve_scoring_request(db, request_id)
+        applicant = db.query(Applicant).filter(Applicant.applicant_id == scoring_request.applicant_id).first()
+        if not applicant:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Scoring request {request_id} not found"
+                detail=f"Applicant details not found for applicant {scoring_request.applicant_id}"
             )
             
-        applicant = db.query(Applicant).filter(Applicant.applicant_id == scoring_request.applicant_id).first()
-        
         from app.models.schemas import ScoringRequest as SchemaScoringRequest
         from app.models.enums import GenderEnum, EducationLevel, MaritalStatus, EmploymentStatus, LoanPurpose, PaymentHistory
         
@@ -267,12 +282,14 @@ async def regenerate_explanation(
 ) -> ExplanationData:
     """Force regeneration of SHAP explanations, updating cache."""
     try:
+        scoring_request = _resolve_scoring_request(db, request_id)
+        actual_request_id = scoring_request.request_id
         # Delete existing cached explanation
-        db.query(DbExplanation).filter(DbExplanation.request_id == request_id).delete()
+        db.query(DbExplanation).filter(DbExplanation.request_id == actual_request_id).delete()
         db.commit()
         
         # Regenerate and cache
-        return await get_explanation(request_id=request_id, db=db, scoring_service=scoring_service)
+        return await get_explanation(request_id=actual_request_id, db=db, scoring_service=scoring_service)
     except Exception as e:
         logger.error(f"Regeneration error: {e}", exc_info=True)
         raise HTTPException(

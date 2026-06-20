@@ -127,13 +127,6 @@ export function ScoringPage() {
 
   return (
     <div className="space-y-6 animate-fadeIn text-slate-800">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1 text-xs text-slate-400 font-medium">
-        <span className="hover:text-slate-650 transition-colors">RiskLens Engine</span>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-primary font-bold">Prediction Engine</span>
-      </nav>
-
       {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Run Individual Prediction</h1>

@@ -229,32 +229,30 @@ async def seed_dashboard_data(db: Session = Depends(get_db)) -> Dict[str, Any]:
             
             # 2. Create scoring request
             req_id = f"REQ-SEED-{1000 + i}"
+            risk_rating_value = template["risk_rating"].title()
             
-            # Explanations structure
+            # Explanations structure conforming to ExplanationData schema
+            top_feats = [
+                {"name": "credit_score", "impact": 0.35 if template["risk_rating"] == "high" else 0.15, "direction": "positive" if template["risk_rating"] == "high" else "negative"},
+                {"name": "debt_to_income_ratio", "impact": 0.25 if template["risk_rating"] == "high" else 0.05, "direction": "positive" if template["risk_rating"] == "high" else "negative"},
+                {"name": "income", "impact": 0.20 if template["risk_rating"] == "low" else 0.05, "direction": "negative" if template["risk_rating"] == "low" else "positive"},
+            ]
+            if template["previous_defaults"] > 0:
+                top_feats.append({"name": "previous_defaults", "impact": 0.30, "direction": "positive"})
+                
             explanations = {
-                "top_features": [
-                    {"name": "credit_score", "impact": 0.35 if template["risk_rating"] == "high" else 0.15, "direction": "positive" if template["risk_rating"] == "high" else "negative"},
-                    {"name": "debt_to_income_ratio", "impact": 0.25 if template["risk_rating"] == "high" else 0.05, "direction": "positive" if template["risk_rating"] == "high" else "negative"},
-                    {"name": "income", "impact": 0.20 if template["risk_rating"] == "low" else 0.05, "direction": "negative" if template["risk_rating"] == "low" else "positive"},
-                    {"name": "previous_defaults", "impact": 0.30 if template["previous_defaults"] > 0 else 0.0, "direction": "positive"}
-                ],
+                "top_features": top_feats,
+                "feature_importance_sum": sum(f["impact"] for f in top_feats),
                 "base_value": 0.15,
-                "expected_value": template["default_probability"]
+                "shap_values": {f["name"]: (f["impact"] if f["direction"] == "positive" else -f["impact"]) for f in top_feats}
             }
             
-            # Audit trail structure
+            # Audit trail structure conforming to AuditTrail schema
             audit_trail = {
-                "timestamp": created_time.isoformat(),
-                "user_id": "system_seeder",
-                "ip_address": "127.0.0.1",
-                "request_data": {
-                    "applicant_id": app_id,
-                    "loan_amount": template["loan_amount"]
-                },
-                "response_data": {
-                    "risk_rating": template["risk_rating"],
-                    "default_probability": template["default_probability"]
-                }
+                "preprocessor_version": "1.0",
+                "validation_passed": True,
+                "threshold_tuning_applied": True,
+                "input_hash": "seed_hash"
             }
             
             db_request = ScoringRequest(
@@ -264,7 +262,7 @@ async def seed_dashboard_data(db: Session = Depends(get_db)) -> Dict[str, Any]:
                 loan_purpose=template["loan_purpose"],
                 model_version="xgboost_v1.0",
                 model_name="xgboost",
-                risk_rating=template["risk_rating"],
+                risk_rating=risk_rating_value,
                 default_probability=template["default_probability"],
                 raw_probability=template["default_probability"],
                 confidence_score=template["confidence_score"],

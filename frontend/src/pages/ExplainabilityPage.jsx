@@ -35,7 +35,7 @@ export function ExplainabilityPage() {
     setSearchError(null);
     try {
       // 1. Fetch scoring history for this applicant
-      const history = await get(`/score/history/${targetId.trim()}`);
+      const history = await get(`/v1/score/history/${targetId.trim()}`);
       if (!history || history.length === 0) {
         throw new Error(`No assessment history found for ID: ${targetId}`);
       }
@@ -266,7 +266,7 @@ export function ExplainabilityPage() {
             <div className="text-right">
               <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Final Risk</p>
               <p className="text-lg font-bold text-primary font-mono">
-                {assessment ? assessment.risk_score.toFixed(2) : '0.78'}
+                {assessment ? (assessment.default_probability ?? assessment.risk_score ?? 0.78).toFixed(2) : '0.78'}
               </p>
             </div>
           </div>
@@ -301,7 +301,7 @@ export function ExplainabilityPage() {
               <div className="z-10 w-16 h-16 rounded-full bg-white shadow-md flex flex-col items-center justify-center border-2 border-primary shrink-0">
                 <span className="text-xs font-bold text-on-surface-variant uppercase text-[8px]">Output</span>
                 <span className="text-sm font-extrabold text-primary font-mono leading-none">
-                  {assessment ? assessment.risk_score.toFixed(2) : '0.78'}
+                  {assessment ? (assessment.default_probability ?? assessment.risk_score ?? 0.78).toFixed(2) : '0.78'}
                 </span>
               </div>
 
@@ -377,7 +377,7 @@ export function ExplainabilityPage() {
             <h5 className="text-xs font-bold text-on-surface-variant uppercase mb-3">Action Recommended</h5>
             <div className="flex items-start gap-3">
               {(() => {
-                const riskRating = assessment?.risk_level || 'medium';
+                const riskRating = (assessment?.risk_rating || assessment?.risk_level || 'medium').toLowerCase();
                 const isLow = riskRating === 'low';
                 const isHigh = riskRating === 'high';
                 const iconColor = isLow ? 'text-green-600' : isHigh ? 'text-red-500' : 'text-amber-500';
