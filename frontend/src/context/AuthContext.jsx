@@ -11,6 +11,30 @@ const USER_KEY = 'auth_user';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
+const MOCK_USERS_KEY = 'mock_users';
+
+const getMockUsers = () => {
+  const users = localStorage.getItem(MOCK_USERS_KEY);
+  if (!users) {
+    const defaultUsers = [
+      {
+        id: "default-admin",
+        username: "admin",
+        email: "admin.risklens@gmail.com",
+        password: "risklens123",
+        first_name: "Super",
+        last_name: "Admin",
+        roles: ["admin"],
+        role: "admin",
+        permissions: ["score", "batch_process", "manage_models", "view_audit_log"]
+      }
+    ];
+    localStorage.setItem(MOCK_USERS_KEY, JSON.stringify(defaultUsers));
+    return defaultUsers;
+  }
+  return JSON.parse(users);
+};
+
 /**
  * AuthProvider component
  * Manages authentication state and provides it to child components
@@ -39,36 +63,42 @@ export function AuthProvider({ children }) {
 
   // Initialize auth state from localStorage on mount
   useEffect(() => {
+    // Seed mock users if not present
+    const seedMockUsers = () => {
+      const mockUsers = localStorage.getItem(MOCK_USERS_KEY);
+      if (!mockUsers) {
+        const defaultUsers = [
+          {
+            id: "default-admin",
+            username: "admin",
+            email: "admin.risklens@gmail.com",
+            password: "risklens123",
+            first_name: "Super",
+            last_name: "Admin",
+            roles: ["admin"],
+            role: "admin",
+            permissions: ["score", "batch_process", "manage_models", "view_audit_log"]
+          }
+        ];
+        localStorage.setItem(MOCK_USERS_KEY, JSON.stringify(defaultUsers));
+      }
+    };
+    seedMockUsers();
+
     const initializeAuth = () => {
       try {
         let savedToken = localStorage.getItem(TOKEN_KEY);
         let savedUser = localStorage.getItem(USER_KEY);
         let savedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
 
-        // Fail-safe: Auto-login default mock user for sandbox if no token is stored
-        if (!savedToken || !savedUser) {
-          const defaultUser = {
-            id: "default-admin",
-            username: "admin",
-            email: "admin@risklens.ai",
-            first_name: "Demo",
-            last_name: "Administrator",
-            roles: ["admin", "user"],
-            permissions: ["score", "batch_process", "manage_models", "view_audit_log"]
-          };
-          localStorage.setItem(TOKEN_KEY, "mock-jwt-token-for-development");
-          localStorage.setItem(REFRESH_TOKEN_KEY, "mock-refresh-token");
-          localStorage.setItem(USER_KEY, JSON.stringify(defaultUser));
-          
-          savedToken = "mock-jwt-token-for-development";
-          savedRefreshToken = "mock-refresh-token";
-          savedUser = JSON.stringify(defaultUser);
+        if (savedToken && savedUser) {
+          setToken(savedToken);
+          setUser(JSON.parse(savedUser));
+          setRefreshToken(savedRefreshToken);
+          setIsAuthenticated(true);
+        } else {
+          clearAuthState();
         }
-
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-        setRefreshToken(savedRefreshToken);
-        setIsAuthenticated(true);
       } catch (err) {
         console.error('Error initializing auth:', err);
         clearAuthState();
@@ -115,17 +145,28 @@ export function AuthProvider({ children }) {
       } catch (fetchErr) {
         if (fetchErr.message === 'MOCK_AUTH' || fetchErr instanceof TypeError) {
           // Network connection error or 404 fallback
+          const mockUsers = getMockUsers();
+          const existingUser = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+          if (!existingUser) {
+            throw new Error('Please signup first!');
+          }
+
+          if (existingUser.password !== password) {
+            throw new Error('Incorrect password.');
+          }
+
           data = {
             access_token: 'mock-jwt-token-for-development',
             refresh_token: 'mock-refresh-token',
             user: {
-              id: 'default-admin',
-              username: 'admin',
-              email: email,
-              first_name: email.split('@')[0],
-              last_name: 'User',
-              roles: ['admin', 'user'],
-              permissions: ['score', 'batch_process', 'manage_models', 'view_audit_log']
+              id: existingUser.id || 'default-admin',
+              username: existingUser.username || existingUser.email.split('@')[0],
+              email: existingUser.email,
+              first_name: existingUser.first_name,
+              last_name: existingUser.last_name,
+              roles: existingUser.roles || ['admin', 'user'],
+              permissions: existingUser.permissions || ['score', 'batch_process', 'manage_models', 'view_audit_log']
             }
           };
         } else {
@@ -165,21 +206,55 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/auth/register`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(userData),
+      let data;
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/v1/auth/register`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData),
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('MOCK_AUTH');
+          }
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Registration failed');
         }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Registration failed');
+        data = await response.json();
+      } catch (fetchErr) {
+        if (fetchErr.message === 'MOCK_AUTH' || fetchErr instanceof TypeError) {
+          // Network connection error or 404 fallback
+          const mockUsers = getMockUsers();
+          const emailExists = mockUsers.some(u => u.email.toLowerCase() === userData.email.toLowerCase());
+          if (emailExists) {
+            throw new Error('Email already registered.');
+          }
+
+          const newUser = {
+            id: `mock-user-${Date.now()}`,
+            username: userData.email.split('@')[0],
+            email: userData.email,
+            password: userData.password,
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            roles: ['analyst'],
+            role: 'analyst',
+            permissions: ['score']
+          };
+
+          mockUsers.push(newUser);
+          localStorage.setItem(MOCK_USERS_KEY, JSON.stringify(mockUsers));
+
+          data = newUser;
+        } else {
+          throw fetchErr;
+        }
       }
-
-      const data = await response.json();
       return data;
     } catch (err) {
       const errorMessage = err.message || 'Registration failed. Please try again.';
@@ -272,24 +347,57 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/auth/profile`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify(profileData),
+      let data;
+      try {
+        if (token === 'mock-jwt-token-for-development') {
+          throw new Error('MOCK_AUTH');
         }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Update failed');
+        const response = await fetch(
+          `${API_BASE_URL}/v1/auth/profile`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(profileData),
+          }
+        );
+
+        if (response.ok) {
+          data = await response.json();
+        } else if (response.status === 404) {
+          throw new Error('MOCK_AUTH');
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.detail || 'Update failed');
+        }
+      } catch (fetchErr) {
+        if (fetchErr.message === 'MOCK_AUTH' || fetchErr instanceof TypeError) {
+          // Network connection error or 404 fallback for mock dev
+          const mockUsers = getMockUsers();
+          const userIndex = mockUsers.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase());
+          if (userIndex !== -1) {
+            mockUsers[userIndex] = {
+              ...mockUsers[userIndex],
+              first_name: profileData.first_name,
+              last_name: profileData.last_name,
+              email: profileData.email,
+            };
+            localStorage.setItem(MOCK_USERS_KEY, JSON.stringify(mockUsers));
+          }
+
+          data = {
+            ...user,
+            first_name: profileData.first_name,
+            last_name: profileData.last_name,
+            email: profileData.email,
+          };
+        } else {
+          throw fetchErr;
+        }
       }
-
-      const data = await response.json();
 
       // Update user state
       localStorage.setItem(USER_KEY, JSON.stringify(data));
@@ -303,7 +411,7 @@ export function AuthProvider({ children }) {
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, [token, user]);
 
   /**
    * Request password reset

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
-import { User, Lock, Bell, LogOut, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Lock, Bell, LogOut, Save, AlertCircle, CheckCircle, Users, Trash2 } from 'lucide-react';
 
 export function SettingsPage() {
   const { user, logout, updateProfile } = useAuth();
@@ -24,12 +24,50 @@ export function SettingsPage() {
     confirm_password: '',
   });
 
-  // Preferences State
   const [preferences, setPreferences] = useState({
     email_notifications: true,
     daily_digest: true,
     risk_alerts: true,
   });
+
+  const [registeredUsers, setRegisteredUsers] = useState([]);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const isAdmin = user?.role === 'admin' || user?.roles?.includes('admin') || user?.email?.toLowerCase() === 'admin.risklens@gmail.com';
+
+  useEffect(() => {
+    if (activeTab === 'admin') {
+      const users = JSON.parse(localStorage.getItem('mock_users') || '[]');
+      setRegisteredUsers(users);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        email: user.email || '',
+      });
+    }
+  }, [user]);
+
+  const handleRemoveUser = (emailToRemove) => {
+    if (emailToRemove.toLowerCase() === 'admin.risklens@gmail.com') {
+      setMessage({ type: 'error', text: 'Super Admin cannot be removed.' });
+      return;
+    }
+    setUserToDelete(emailToRemove);
+  };
+
+  const confirmDeleteUser = () => {
+    if (!userToDelete) return;
+    const users = JSON.parse(localStorage.getItem('mock_users') || '[]');
+    const updatedUsers = users.filter(u => u.email.toLowerCase() !== userToDelete.toLowerCase());
+    localStorage.setItem('mock_users', JSON.stringify(updatedUsers));
+    setRegisteredUsers(updatedUsers);
+    setMessage({ type: 'success', text: `User ${userToDelete} removed successfully.` });
+    setUserToDelete(null);
+  };
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
@@ -114,6 +152,7 @@ export function SettingsPage() {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'password', label: 'Password', icon: Lock },
     { id: 'notifications', label: 'Notifications', icon: Bell },
+    ...(isAdmin ? [{ id: 'admin', label: 'Users', icon: Users }] : []),
   ];
 
   return (
@@ -353,20 +392,106 @@ export function SettingsPage() {
             </div>
           </form>
         )}
+
+        {/* Admin Tab (Users Management) */}
+        {activeTab === 'admin' && isAdmin && (
+          <div className="space-y-5">
+            <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-4 border-b border-gray-300/20 pb-3">
+              Users Management
+            </h3>
+            
+            <p className="text-xs text-on-surface-variant font-medium">
+              Total registered users: <span className="text-indigo-600 font-bold">{registeredUsers.length}</span>
+            </p>
+
+            <div className="overflow-hidden border border-slate-100 rounded-2xl">
+              <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
+                <thead className="bg-slate-50 font-bold text-slate-500 uppercase tracking-wider text-[10px]">
+                  <tr>
+                    <th scope="col" className="px-6 py-4">Name</th>
+                    <th scope="col" className="px-6 py-4">Email</th>
+                    <th scope="col" className="px-6 py-4">Role</th>
+                    <th scope="col" className="px-6 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white font-medium text-on-surface">
+                  {registeredUsers.map(userItem => {
+                    const isSuperAdmin = userItem.email?.toLowerCase() === 'admin.risklens@gmail.com';
+                    return (
+                      <tr key={userItem.email} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {userItem.first_name} {userItem.last_name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {userItem.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            isSuperAdmin || userItem.role === 'admin' || userItem.roles?.includes('admin')
+                              ? 'bg-indigo-50 text-indigo-700'
+                              : 'bg-emerald-50 text-emerald-700'
+                          }`}>
+                            {isSuperAdmin || userItem.role === 'admin' || userItem.roles?.includes('admin') ? 'Admin' : 'Analyst'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <button
+                            onClick={() => handleRemoveUser(userItem.email)}
+                            disabled={isSuperAdmin}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                              isSuperAdmin
+                                ? 'text-slate-300 cursor-not-allowed'
+                                : 'text-red-600 hover:bg-red-50 active:scale-95'
+                            }`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {registeredUsers.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-8 text-center text-slate-400 font-normal">
+                        No registered users found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Danger Zone */}
-      <div className="bg-red-50/50 border border-red-100 rounded-2xl p-8 max-w-2xl shadow-sm">
-        <h3 className="text-base font-bold text-red-600 mb-2 font-headline uppercase tracking-wider">Danger Zone</h3>
-        <p className="text-xs text-on-surface-variant mb-6">Logging out will invalidate your session on this browser.</p>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all shadow-md active:scale-95 hover:scale-102"
-        >
-          <LogOut className="w-4 h-4 text-white" />
-          Logout Session
-        </button>
-      </div>
+      {/* Confirmation Modal */}
+      {userToDelete && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full border border-slate-100 shadow-xl space-y-6">
+            <div className="space-y-2">
+              <h4 className="text-base font-bold text-slate-800">Remove User</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to remove <span className="font-bold text-slate-700">{userToDelete}</span>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setUserToDelete(null)}
+                className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-50 active:scale-95 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteUser}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-sm active:scale-95 transition-all"
+              >
+                Remove User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
