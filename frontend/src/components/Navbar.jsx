@@ -49,7 +49,22 @@ export function Navbar() {
     ? `${user.first_name} ${user.last_name}` 
     : 'Erika Collins';
     
-  const profileRole = user?.role ? user.role : 'Super Admin';
+  const getRoleLabel = () => {
+    if (user?.email?.toLowerCase() === 'admin.risklens@gmail.com') {
+      return 'Admin';
+    }
+    if (user?.role) {
+      if (user.role.toLowerCase() === 'admin') return 'Admin';
+      return 'Analyst';
+    }
+    if (user?.roles && user.roles.length > 0) {
+      if (user.roles.includes('admin')) return 'Admin';
+      return 'Analyst';
+    }
+    return 'Analyst';
+  };
+
+  const profileRole = getRoleLabel();
 
   const getInitials = (name) => {
     if (!name) return 'U';

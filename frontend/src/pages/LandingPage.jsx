@@ -182,7 +182,7 @@ export function LandingPage() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <button
-                  onClick={handleRegisterAction}
+                  onClick={handleAction}
                   className="bg-primary-container text-on-primary px-8 py-4 rounded-lg font-h4 text-h4 hover:scale-[1.02] transition-transform shadow-lg cursor-pointer font-semibold"
                 >
                   Get Started
