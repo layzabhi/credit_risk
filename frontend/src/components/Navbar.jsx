@@ -9,8 +9,8 @@ export function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem('theme') === 'dark' || 
-           (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    return localStorage.getItem('theme') === 'dark' ||
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
   });
 
   React.useEffect(() => {
@@ -45,10 +45,10 @@ export function Navbar() {
     }
   };
 
-  const profileName = user?.first_name && user?.last_name 
-    ? `${user.first_name} ${user.last_name}` 
+  const profileName = user?.first_name && user?.last_name
+    ? `${user.first_name} ${user.last_name}`
     : 'Erika Collins';
-    
+
   const getRoleLabel = () => {
     if (user?.email?.toLowerCase() === 'admin.risklens@gmail.com') {
       return 'Admin';
@@ -86,7 +86,7 @@ export function Navbar() {
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-4">
           {/* Day / Night Mode Toggle */}
-          <button 
+          <button
             onClick={() => setDarkMode(!darkMode)}
             className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
           >
@@ -106,10 +106,10 @@ export function Navbar() {
               className="flex items-center gap-3 ml-2 cursor-pointer hover:opacity-90 transition-opacity focus:outline-none"
             >
               {user?.avatar_url ? (
-                <img 
-                  alt={profileName} 
-                  className="w-10 h-10 rounded-full object-cover border border-slate-200" 
-                  src={user.avatar_url} 
+                <img
+                  alt={profileName}
+                  className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                  src={user.avatar_url}
                 />
               ) : (
                 <div className="w-10 h-10 rounded-full border border-slate-200 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm shrink-0">
