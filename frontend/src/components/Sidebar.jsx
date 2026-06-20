@@ -2,18 +2,18 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { MenuToggle } from './ui/menu-toggle';
-import { 
-  Home, 
-  Activity, 
-  Eye, 
-  LineChart, 
-  Database, 
-  Info, 
-  Settings, 
-  Shield, 
-  ChevronLeft, 
-  ChevronRight, 
-  Menu, 
+import {
+  Home,
+  Activity,
+  Eye,
+  LineChart,
+  Database,
+  Info,
+  Settings,
+  Shield,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
   X,
   CheckCircle2
 } from 'lucide-react';
@@ -87,9 +87,8 @@ export function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`nav-sidebar flex flex-col py-6 text-slate-800 shrink-0 z-20 transition-all duration-300 relative ${
-          open ? 'w-56' : 'w-16'
-        }`}
+        className={`nav-sidebar flex flex-col py-6 text-slate-800 shrink-0 z-20 transition-all duration-300 relative ${open ? 'w-56' : 'w-16'
+          }`}
       >
         {/* Header */}
         {open ? (
@@ -105,7 +104,7 @@ export function Sidebar() {
               className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center flex-shrink-0 transition-transform duration-200 hover:scale-105 active:scale-95 focus:outline-none"
               aria-label="Collapse Sidebar"
             >
-              <MenuToggle open={true} onOpenChange={() => {}} className="w-4 h-4 text-slate-600 pointer-events-none" />
+              <MenuToggle open={true} onOpenChange={() => { }} className="w-4 h-4 text-slate-600 pointer-events-none" />
             </button>
           </div>
         ) : (
@@ -115,7 +114,7 @@ export function Sidebar() {
               className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center flex-shrink-0 transition-transform duration-200 hover:scale-105 active:scale-95 focus:outline-none"
               aria-label="Expand Sidebar"
             >
-              <MenuToggle open={false} onOpenChange={() => {}} className="w-4 h-4 text-slate-600 pointer-events-none" />
+              <MenuToggle open={false} onOpenChange={() => { }} className="w-4 h-4 text-slate-600 pointer-events-none" />
             </button>
           </div>
         )}
@@ -135,13 +134,11 @@ export function Sidebar() {
                     setOpen(false);
                   }
                 }}
-                className={`w-full flex items-center transition-all relative ${
-                  open ? 'px-6 gap-3 py-2.5 rounded-r-lg' : 'justify-center py-2.5'
-                } ${
-                  active
+                className={`w-full flex items-center transition-all relative ${open ? 'px-6 gap-3 py-2.5 rounded-r-lg' : 'justify-center py-2.5'
+                  } ${active
                     ? 'active-nav'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
+                  }`}
                 title={item.label}
               >
                 <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-indigo-600' : 'text-slate-400'}`} />

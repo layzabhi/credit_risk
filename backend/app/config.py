@@ -94,22 +94,5 @@ def get_settings() -> Settings:
     return Settings()
 
 
-# Validate required settings on startup
-def validate_settings(settings: Settings) -> None:
-    """Validate that required settings are configured."""
-    required_vars = [
-        ("SECRET_KEY", settings.SECRET_KEY, "your-secret-key-change-in-production"),
-    ]
-    
-    for var_name, var_value, default_value in required_vars:
-        if var_value == default_value:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(
-                f"⚠️  {var_name} is using default value. "
-                f"Please set {var_name} environment variable in production."
-            )
-
-
 # Instantiate settings
 settings = get_settings()

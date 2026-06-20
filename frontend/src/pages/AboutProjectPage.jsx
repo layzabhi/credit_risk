@@ -21,6 +21,7 @@ import {
 
 import abhishekPhoto from './Abhishek gupta_passport size.png';
 import ranitPhoto from './Ranit Mondal.jpeg';
+import prathamPhoto from './Pratham Kumar.jpeg';
 
 export function AboutProjectPage() {
   const [whitepaperOpen, setWhitepaperOpen] = useState(false);
@@ -373,8 +374,12 @@ export function AboutProjectPage() {
 
                 {/* Pratham Kumar */}
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full border border-slate-200 p-[1px] bg-white flex items-center justify-center bg-gradient-to-br from-violet-400 to-purple-500 shrink-0">
-                    <span className="text-white text-sm font-bold">PK</span>
+                  <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 p-[1px] bg-white">
+                    <img
+                      alt="Pratham Kumar"
+                      className="w-full h-full object-cover rounded-full"
+                      src={prathamPhoto}
+                    />
                   </div>
                   <div>
                     <h4 className="font-bold text-on-surface text-sm">Pratham Kumar</h4>

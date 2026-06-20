@@ -39,10 +39,10 @@ export function ExplainabilityPage() {
       if (!history || history.length === 0) {
         throw new Error(`No assessment history found for ID: ${targetId}`);
       }
-      
+
       // 2. Fetch explanation details
       const explData = await get(`/v1/explain/${targetId.trim()}`);
-      
+
       setAssessment(history[0]);
       setExplanation(explData);
     } catch (err) {
@@ -80,10 +80,6 @@ export function ExplainabilityPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold flex items-center gap-2 hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98] transition-all bg-white shadow-sm">
-            <Download className="w-4 h-4" />
-            Export PDF
-          </button>
           <button
             onClick={handleRecalculate}
             className={`px-6 py-2.5 rounded-xl bg-primary text-white font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-sm ${isCalculating && 'opacity-75'}`}
@@ -215,7 +211,7 @@ export function ExplainabilityPage() {
             <Loader2 className="w-10 h-10 text-primary animate-spin" />
           </div>
         )}
-        
+
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h4 className="font-semibold text-xl flex items-center gap-2 text-on-surface">
@@ -242,7 +238,7 @@ export function ExplainabilityPage() {
                   className="bg-transparent border-none focus:ring-0 text-xs w-full p-0 font-medium placeholder:text-outline text-on-surface"
                   placeholder="Search Application ID..."
                 />
-                <button 
+                <button
                   onClick={() => fetchExplanationData(searchTerm)}
                   className="text-xs font-bold text-primary hover:underline"
                 >
@@ -281,8 +277,8 @@ export function ExplainabilityPage() {
                 {(explanation?.top_features?.filter(f => f.direction === 'positive') || []).slice(0, 3).map((feat, idx) => {
                   const widthPercent = Math.min(Math.max(feat.impact * 150, 45), 95);
                   return (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       style={{ width: `${widthPercent}%` }}
                       className="h-8 bg-red-500/10 border-r-4 border-red-500 rounded-l-lg flex items-center justify-end pr-3 transition-all"
                     >
@@ -310,8 +306,8 @@ export function ExplainabilityPage() {
                 {(explanation?.top_features?.filter(f => f.direction === 'negative') || []).slice(0, 3).map((feat, idx) => {
                   const widthPercent = Math.min(Math.max(feat.impact * 150, 45), 95);
                   return (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       style={{ width: `${widthPercent}%` }}
                       className="h-8 bg-green-500/15 border-l-4 border-green-500 rounded-r-lg flex items-center justify-start pl-3 transition-all"
                     >
@@ -383,8 +379,8 @@ export function ExplainabilityPage() {
                 const iconColor = isLow ? 'text-green-600' : isHigh ? 'text-red-500' : 'text-amber-500';
                 const IconComponent = isLow ? CheckCircle : AlertTriangle;
                 const actionText = isLow ? 'Standard automatic processing recommended. The decision is highly stable.' :
-                                   isHigh ? 'Automatic rejection recommended. High probability of default exceeds threshold.' :
-                                   'Secondary manual review recommended. Moderate risk factors detected.';
+                  isHigh ? 'Automatic rejection recommended. High probability of default exceeds threshold.' :
+                    'Secondary manual review recommended. Moderate risk factors detected.';
                 return (
                   <>
                     <IconComponent className={`w-5 h-5 ${iconColor} shrink-0 mt-0.5`} />

@@ -310,22 +310,3 @@ class SHAPExplainer:
             "final_value": base_value + sum(row_shap),
         }
     
-    def get_dependence_plot_data(
-        self,
-        feature_name: str,
-        X: pd.DataFrame,
-        shap_values: np.ndarray,
-    ) -> Dict[str, Any]:
-        """Generate data for SHAP dependence plot."""
-        if shap_values is None or len(shap_values) == 0 or feature_name not in X.columns:
-            return {}
-            
-        feat_idx = X.columns.get_loc(feature_name)
-        feature_values = X[feature_name].values.tolist()
-        feature_shap = shap_values[:, feat_idx].tolist()
-        
-        return {
-            "feature_name": feature_name,
-            "feature_values": feature_values,
-            "shap_values": feature_shap,
-        }

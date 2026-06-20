@@ -47,8 +47,6 @@ class LegacyDataPreprocessor:
             X = X.fillna(X.mean(numeric_only=True) if method == 'mean' else X.median(numeric_only=True))
         return X
 
-    def _handle_outliers(self, X: pd.DataFrame) -> pd.DataFrame:
-        return X
 
     def _encode_categorical(self, X: pd.DataFrame, fit: bool = False) -> pd.DataFrame:
         X = X.copy()
@@ -198,12 +196,6 @@ class ModelLoader:
             raise ValueError("No primary model set")
         return self.get_model(self.primary_model)
     
-    def set_primary_model(self, model_name: str) -> None:
-        """Set which model to use for production scoring."""
-        if model_name not in self.models:
-            raise ValueError(f"Model '{model_name}' not loaded")
-        self.primary_model = model_name
-        logger.info(f"Primary model set to: {model_name}")
     
     def get_preprocessor(self, model_name: str) -> Optional[Any]:
         """Get preprocessor for a model."""
@@ -230,7 +222,3 @@ class ModelLoader:
         self.calibration_data.clear()
         self.primary_model = None
         logger.info("ModelLoader cleaned up")
-    
-    def list_models(self) -> list[str]:
-        """Get list of loaded model names."""
-        return list(self.models.keys())
