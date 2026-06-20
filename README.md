@@ -2,8 +2,6 @@
 
 RiskLens is a premium, end-to-end credit risk intelligence platform designed to assess, score, and analyze applicant defaults using machine learning. It features a state-of-the-art XGBoost model, real-time SHAP explainability visualizations, a React-based governance dashboard, and a fully automated model training and evaluation pipeline.
 
-The design, data schema standardization, and model parameters are developed in alignment with modern credit risk research, specifically the thesis **"Utilizing AI for Improved Credit Risk Assessment" (Baglarbasi, 2025)**.
-
 ---
 
 ## 1. System Architecture
@@ -15,46 +13,44 @@ graph TD
     subgraph Frontend [React Web Client]
         A[Dashboard & Metrics]
         B[Single Applicant Scoring Form]
-        C[Batch CSV Processor]
-        D[Model Explainability Panel]
+        C[Model Explainability Panel]
     end
 
     subgraph Backend [FastAPI Web Service]
-        E[API Gateway / Router]
-        F[Scoring Service]
-        G[SHAP Explainer Service]
-        H[Database Session Manager]
+        D[API Gateway / Router]
+        E[Scoring Service]
+        F[SHAP Explainer Service]
+        G[Database Session Manager]
     end
 
     subgraph Storage [Database Layer]
-        I[(PostgreSQL / SQLite)]
+        H[(PostgreSQL / SQLite)]
     end
 
     subgraph ML_Pipeline [ML Training & Registry]
-        J[Data Loader & Merger]
-        K[DataPreprocessor]
-        L[Model Trainer]
-        M[Threshold Tuner]
-        N[Model Registry / Disk]
+        I[Data Loader & Merger]
+        J[DataPreprocessor]
+        K[Model Trainer]
+        L[Threshold Tuner]
+        M[Model Registry / Disk]
     end
 
-    A --> E
-    B --> E
-    C --> E
+    A --> D
+    B --> D
+    C --> D
+
     D --> E
+    D --> F
+    D --> G
 
-    E --> F
-    E --> G
-    E --> H
-
-    H --> I
-    F --> N
-    G --> N
+    G --> H
+    E --> M
+    F --> M
     
+    I --> J
     J --> K
     K --> L
     L --> M
-    M --> N
 ```
 
 ---
@@ -63,7 +59,6 @@ graph TD
 
 *   **Real-time Scoring**: Evaluates single credit applications instantly using the production XGBoost classifier, mapping profiles to Low, Medium, and High-risk rating bands.
 *   **SHAP Explainability**: Visualizes decision drivers using local cooperative game theory. Provides force plots and waterfall graphs directly to underwriters, eliminating "black-box" model compliance concerns.
-*   **Batch CSV Processing**: Uploads and processes thousands of applicant profiles simultaneously, returning interactive risk tables and downloadable results.
 *   **Model Telemetry & Dashboard**: Tracks production performance metrics, default probabilities, population stability indexes (PSI), and feature drift in real-time.
 *   **Compliance & Governance**: Implements automated audit trails for model outputs, capturing feature hashes, timestamps, preprocessor versions, and validation results.
 *   **Self-Healing Drift Rebuilder**: Alerts administrators to feature drift and permits XGBoost model retraining using fresh quarterly data through a secure UI panel.
