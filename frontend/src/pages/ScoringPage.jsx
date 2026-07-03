@@ -16,7 +16,7 @@ import {
   Loader2
 } from 'lucide-react';
 
-export const normalizeScoreResult = (rawResult) => {
+const normalizeScoreResult = (rawResult) => {
   if (!rawResult) return null;
 
   const risk_level = rawResult.risk_level || rawResult.risk_rating || 'low';

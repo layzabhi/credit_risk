@@ -1,10 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
 
 export function LandingPage() {
   const navigate = useRef(useNavigate()).current;
-  const { isAuthenticated } = useAuth();
   const containerRef = useRef(null);
 
   // Setup scroll intersection observer for entrance animations
@@ -35,20 +33,13 @@ export function LandingPage() {
   }, []);
 
   const handleAction = () => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    } else {
-      navigate('/login');
-    }
+    navigate('/login');
   };
 
   const handleRegisterAction = () => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    } else {
-      navigate('/register');
-    }
+    navigate('/register');
   };
+
 
   return (
     <div className="landing-page-root" ref={containerRef}>

@@ -137,7 +137,7 @@ export function AboutProjectPage() {
               {
                 feature: 'Decision Speed',
                 traditional: '24–48 hours',
-                risklens: 'Instant (50ms)',
+                risklens: 'Instant (~88ms)',
                 highlight: true,
               },
               {
@@ -321,7 +321,7 @@ export function AboutProjectPage() {
                     <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-[#0077B5] hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:scale-105 active:scale-95 transition-all bg-white shadow-sm">
                       <Linkedin className="w-4 h-4" />
                     </a>
-                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=suchandra.banerjee@bcrec.ac.in" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all bg-white shadow-sm">
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=mailnmeetsuchandra@gmail.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all bg-white shadow-sm">
                       <Mail className="w-4 h-4" />
                     </a>
                   </div>
