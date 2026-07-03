@@ -453,7 +453,7 @@ export function AboutProjectPage() {
                     { label: 'AUC-ROC', value: '0.89', sub: 'vs 0.70 baseline' },
                     { label: 'Accuracy', value: '87.7%', sub: 'hold-out test set' },
                     { label: 'Recall', value: '75%', sub: 'default detection' },
-                    { label: 'Latency', value: '50ms', sub: 'p99 inference' },
+                    { label: 'Latency', value: '88ms', sub: 'p99 inference' },
                   ].map((m) => (
                     <div key={m.label} className="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-center">
                       <p className="text-xl font-bold text-primary">{m.value}</p>

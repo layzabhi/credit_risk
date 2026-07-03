@@ -45,14 +45,14 @@ export function ModelPerformancePage() {
         <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-              <Target className="w-5 h-5 text-tertiary" />
+              <Target className="w-5 h-5" style={{ color: '#1b8f09ff' }} />
             </div>
             <span className="text-[10px] font-bold text-on-surface-variant bg-[#e2e4ea] px-2.5 py-1 rounded-full font-mono">Stable</span>
           </div>
           <p className="text-on-surface-variant text-sm font-medium">Precision</p>
           <h4 className="text-3xl font-extrabold text-on-surface mt-1 font-mono">35.7%</h4>
           <div className="w-full h-1.5 bg-slate-100 rounded-full mt-4 overflow-hidden border border-slate-200 p-[1px]">
-            <div className="h-full bg-tertiary rounded-full" style={{ width: '35.7%' }}></div>
+            <div className="h-full rounded-full" style={{ width: '35.7%', backgroundColor: '#1b8f09ff' }}></div>
           </div>
         </div>
 
@@ -60,14 +60,14 @@ export function ModelPerformancePage() {
         <div className="p-6 rounded-2xl border border-slate-100 shadow-sm bg-white">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-              <RefreshCw className="w-5 h-5 text-indigo-400" />
+              <RefreshCw className="w-5 h-5" style={{ color: '#fc1111ff' }} />
             </div>
             <span className="text-[10px] font-bold text-red-500 bg-red-100 px-2.5 py-1 rounded-full font-mono">-0.4%</span>
           </div>
           <p className="text-on-surface-variant text-sm font-medium">Recall</p>
           <h4 className="text-3xl font-extrabold text-on-surface mt-1 font-mono">75.0%</h4>
           <div className="w-full h-1.5 bg-slate-100 rounded-full mt-4 overflow-hidden border border-slate-200 p-[1px]">
-            <div className="h-full bg-indigo-400 rounded-full" style={{ width: '75.0%' }}></div>
+            <div className="h-full rounded-full" style={{ width: '75.0%', backgroundColor: '#fc1111ff' }}></div>
           </div>
         </div>
 
@@ -98,11 +98,11 @@ export function ModelPerformancePage() {
             </div>
             <div className="flex items-center gap-6 text-xs font-bold">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-primary"></span>
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#1b8f09ff' }}></span>
                 <span className="text-on-surface">Precision</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-tertiary"></span>
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fc1111ff' }}></span>
                 <span className="text-on-surface">Recall</span>
               </div>
             </div>
@@ -116,27 +116,27 @@ export function ModelPerformancePage() {
               <line x1="0" y1="100" x2="1000" y2="100" stroke="#8a8c9a" strokeWidth="1" strokeDasharray="5,5" opacity="0.15" />
               <line x1="0" y1="150" x2="1000" y2="150" stroke="#8a8c9a" strokeWidth="1" strokeDasharray="5,5" opacity="0.15" />
 
-              {/* Recall Line (Violet) */}
+              {/* Recall Line (Red) */}
               <path
                 fill="none"
-                stroke="#7c3aed"
+                stroke="#fc1111ff"
                 strokeWidth="3"
                 strokeLinecap="round"
-                opacity="0.35"
+                opacity="100"
                 d="M0,150 L100,135 L200,140 L300,120 L400,135 L500,130 L600,140 L700,115 L800,125 L900,120 L1000,110"
               />
-              {/* Precision Line (Indigo) */}
+              {/* Precision Line (Green) */}
               <path
                 fill="none"
-                stroke="#6366f1"
+                stroke="#1b8f09ff"
                 strokeWidth="4"
                 strokeLinecap="round"
                 d="M0,80 L100,70 L200,75 L300,60 L400,85 L500,65 L600,70 L700,55 L800,65 L900,60 L1000,52"
               />
 
               {/* Anchor points */}
-              <circle cx="1000" cy="52" r="5" fill="#6366f1" />
-              <circle cx="1000" cy="110" r="5" fill="#7c3aed" />
+              <circle cx="1000" cy="52" r="5" fill="#1b8f09ff" />
+              <circle cx="1000" cy="110" r="5" fill="#fc1111ff" />
             </svg>
           </div>
           <div className="flex justify-between mt-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-2">
