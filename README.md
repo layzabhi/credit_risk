@@ -1,6 +1,8 @@
 # RiskLens: AI-Powered Credit Risk Assessment & Scoring Platform
 
-RiskLens is a premium, end-to-end credit risk intelligence platform designed to assess, score, and analyze applicant defaults using machine learning. It features a state-of-the-art XGBoost model, real-time SHAP explainability visualizations, a React-based governance dashboard, and a fully automated model training and evaluation pipeline.
+RiskLens is an end-to-end credit risk assessment and scoring platform that combines machine learning, explainability, model monitoring, and a web-based risk analysis interface.
+
+The system uses an XGBoost-based classification pipeline with SHAP explanations and a React + FastAPI application architecture. It also includes model evaluation, drift monitoring, audit logging, and automated retraining workflows.
 
 ---
 
@@ -57,11 +59,11 @@ graph TD
 
 ## 2. Core Features
 
-*   **Real-time Scoring**: Evaluates single credit applications instantly using the production XGBoost classifier, mapping profiles to Low, Medium, and High-risk rating bands.
-*   **SHAP Explainability**: Visualizes decision drivers using local cooperative game theory. Provides force plots and waterfall graphs directly to underwriters, eliminating "black-box" model compliance concerns.
-*   **Model Telemetry & Dashboard**: Tracks production performance metrics, default probabilities, population stability indexes (PSI), and feature drift in real-time.
-*   **Compliance & Governance**: Implements automated audit trails for model outputs, capturing feature hashes, timestamps, preprocessor versions, and validation results.
-*   **Self-Healing Drift Rebuilder**: Alerts administrators to feature drift and permits XGBoost model retraining using fresh quarterly data through a secure UI panel.
+- **Credit Risk Scoring**: Evaluates individual credit applications and assigns Low, Medium, or High risk bands based on predicted default probability.
+- **SHAP Explainability**: Provides local model explanations to identify the features contributing to individual predictions using SHAP.
+- **Model Monitoring**: Tracks model performance, prediction distributions, population stability index (PSI), and feature drift.
+- **Audit & Governance**: Records model outputs, timestamps, feature hashes, preprocessing versions, and validation information for traceability.
+- **Model Retraining Workflow**: Provides an administrative workflow for retraining and evaluating the XGBoost model using updated data.
 
 ---
 
@@ -135,13 +137,14 @@ Orchestrate the entire platform (PostgreSQL, FastAPI Backend, React Frontend, an
     ```
 2.  **Spin up the containers**:
     ```bash
-    docker-compose up --build
+    docker compose up --build
     ```
 3.  **Access the applications**:
     *   **Frontend Interface**: `http://localhost:3000`
     *   **Backend Swagger API Docs**: `http://localhost:8000/docs`
     *   **Adminer DB Console**: `http://localhost:8080` (Server: `postgres`, Username: `postgres`, Password: `postgres`, DB: `credit_risk`)
-
+    
+     *The credentials shown above are development-only defaults and should not be used in production.*
 ---
 
 ### Option B: Local Manual Installation
@@ -226,7 +229,7 @@ Under a recall-constrained optimization ($\text{Recall} \ge 75\%$), models yield
 | **Logistic Regression** | 0.5722 | 85.78% | 31.86% | 75.01% | 44.73% | 87.97% |
 | **Decision Tree** | 0.5934 | 84.57% | 29.90% | 75.26% | 42.80% | 86.29% |
 
-*For complete training procedures and hyperparameter grids, consult [MODEL_TRAINING.md](file:///c:/All%20Projects/credit_risk_project/ml_training/MODEL_TRAINING.md).*
+*For complete training procedures and hyperparameter grids, see [`MODEL_TRAINING.md`](ml_training/MODEL_TRAINING.md).*
 
 ---
 
